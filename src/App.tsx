@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Sites from "./pages/Sites";
 import Checkpoints from "./pages/Checkpoints";
+import Guards from "./pages/Guards";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -58,6 +59,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Checkpoints />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/guards"
+              element={
+                <ProtectedRoute>
+                  <Guards />
                 </ProtectedRoute>
               }
             />
