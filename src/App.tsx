@@ -7,6 +7,8 @@ import { AuthProvider, useAuth } from "@/components/auth/AuthProvider";
 import { AppLayout } from "@/components/layout/AppLayout";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import Sites from "./pages/Sites";
+import Checkpoints from "./pages/Checkpoints";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +42,22 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/sites"
+              element={
+                <ProtectedRoute>
+                  <Sites />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/checkpoints"
+              element={
+                <ProtectedRoute>
+                  <Checkpoints />
                 </ProtectedRoute>
               }
             />
