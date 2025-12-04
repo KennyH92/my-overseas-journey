@@ -12,6 +12,7 @@ import Checkpoints from "./pages/Checkpoints";
 import Guards from "./pages/Guards";
 import Notices from "./pages/Notices";
 import PatrolPlans from "./pages/PatrolPlans";
+import PatrolReports from "./pages/PatrolReports";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -85,6 +86,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <PatrolPlans />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/basic/report"
+              element={
+                <ProtectedRoute>
+                  <PatrolReports />
                 </ProtectedRoute>
               }
             />
