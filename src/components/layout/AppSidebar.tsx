@@ -1,6 +1,7 @@
 import { 
   Home, Users, MapPin, ClipboardList, 
-  FileText, Bell, Calendar, Shield
+  FileText, Bell, Calendar, Shield,
+  Database, Settings, UserCog
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import {
@@ -26,6 +27,13 @@ const setupItems = [
 
 const basicItems = [
   { title: '巡更报告', url: '/basic/report', icon: FileText },
+];
+
+const dataItems = [
+  { title: '设备管理', url: '/data/device', icon: Database },
+  { title: '系统管理', url: '/data/system', icon: Settings },
+  { title: '角色权限', url: '/data/role', icon: UserCog },
+  { title: '用户管理', url: '/data/user', icon: Users },
 ];
 
 
@@ -77,6 +85,25 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {basicItems.map((item) => (
+                <SidebarMenuItem key={item.url}>
+                  <SidebarMenuButton asChild>
+                    <NavLink to={item.url}>
+                      <item.icon className="h-4 w-4" />
+                      {!collapsed && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Data Management */}
+        <SidebarGroup>
+          <SidebarGroupLabel>资料设置</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {dataItems.map((item) => (
                 <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url}>
