@@ -13,6 +13,7 @@ import Guards from "./pages/Guards";
 import Notices from "./pages/Notices";
 import PatrolPlans from "./pages/PatrolPlans";
 import PatrolReports from "./pages/PatrolReports";
+import Companies from "./pages/Companies";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -94,6 +95,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <PatrolReports />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/companies"
+              element={
+                <ProtectedRoute>
+                  <Companies />
                 </ProtectedRoute>
               }
             />
