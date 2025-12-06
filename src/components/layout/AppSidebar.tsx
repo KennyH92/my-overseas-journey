@@ -1,7 +1,8 @@
 import { 
   Home, Users, MapPin, ClipboardList, 
   FileText, Bell, Calendar, Shield,
-  Database, Settings, UserCog
+  Database, Settings, UserCog, History,
+  BarChart3, CalendarDays
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import {
@@ -27,6 +28,9 @@ const setupItems = [
 
 const basicItems = [
   { title: '巡更报告', url: '/basic/report', icon: FileText },
+  { title: '巡更历史', url: '/basic/history', icon: History },
+  { title: '巡更统计', url: '/basic/charts', icon: BarChart3 },
+  { title: '巡更日历', url: '/basic/calendar', icon: CalendarDays },
 ];
 
 const dataItems = [
