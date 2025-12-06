@@ -3,24 +3,18 @@ import { AppSidebar } from './AppSidebar';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { Cloud, LogOut, User } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 interface AppLayoutProps {
   children: React.ReactNode;
 }
-
-export function AppLayout({ children }: AppLayoutProps) {
-  const { user, signOut } = useAuth();
-
-  return (
-    <SidebarProvider>
+export function AppLayout({
+  children
+}: AppLayoutProps) {
+  const {
+    user,
+    signOut
+  } = useAuth();
+  return <SidebarProvider>
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         
@@ -31,7 +25,7 @@ export function AppLayout({ children }: AppLayoutProps) {
               <SidebarTrigger className="text-foreground" />
               <div className="flex items-center gap-2">
                 <Cloud className="w-6 h-6 text-primary" />
-                <h1 className="text-lg font-semibold text-foreground">国管巡更系统-港不</h1>
+                <h1 className="text-lg font-semibold text-foreground">PATROL</h1>
               </div>
             </div>
 
@@ -62,6 +56,5 @@ export function AppLayout({ children }: AppLayoutProps) {
           </main>
         </div>
       </div>
-    </SidebarProvider>
-  );
+    </SidebarProvider>;
 }
