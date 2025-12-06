@@ -18,6 +18,10 @@ import DeviceManagement from "./pages/DeviceManagement";
 import SystemManagement from "./pages/SystemManagement";
 import RoleManagement from "./pages/RoleManagement";
 import UserManagement from "./pages/UserManagement";
+import PatrolDetail from "./pages/PatrolDetail";
+import PatrolHistory from "./pages/PatrolHistory";
+import PatrolCharts from "./pages/PatrolCharts";
+import PatrolCalendar from "./pages/PatrolCalendar";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -99,6 +103,38 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <PatrolReports />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/patrol/detail/:id"
+              element={
+                <ProtectedRoute>
+                  <PatrolDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/basic/history"
+              element={
+                <ProtectedRoute>
+                  <PatrolHistory />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/basic/charts"
+              element={
+                <ProtectedRoute>
+                  <PatrolCharts />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/basic/calendar"
+              element={
+                <ProtectedRoute>
+                  <PatrolCalendar />
                 </ProtectedRoute>
               }
             />
