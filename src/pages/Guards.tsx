@@ -117,7 +117,7 @@ export default function Guards() {
         name: data.name,
         employee_id: data.employee_id || null,
         phone: data.phone || null,
-        company_id: data.company_id || null,
+        company_id: data.company_id && data.company_id !== "none" ? data.company_id : null,
         status: data.status,
       }]);
       if (error) throw error;
@@ -145,7 +145,7 @@ export default function Guards() {
           name: data.name,
           employee_id: data.employee_id || null,
           phone: data.phone || null,
-          company_id: data.company_id || null,
+          company_id: data.company_id && data.company_id !== "none" ? data.company_id : null,
           status: data.status,
         })
         .eq("id", selectedGuard.id);
@@ -193,7 +193,7 @@ export default function Guards() {
       name: "",
       employee_id: "",
       phone: "",
-      company_id: "",
+      company_id: "none",
       status: "active",
     });
     setIsDialogOpen(true);
@@ -205,7 +205,7 @@ export default function Guards() {
       name: guard.name,
       employee_id: guard.employee_id || "",
       phone: guard.phone || "",
-      company_id: guard.company_id || "",
+      company_id: guard.company_id || "none",
       status: guard.status || "active",
     });
     setIsDialogOpen(true);
@@ -362,7 +362,7 @@ export default function Guards() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">No Company</SelectItem>
+                        <SelectItem value="none">No Company</SelectItem>
                         {companies.map((company) => (
                           <SelectItem key={company.id} value={company.id}>
                             {company.name}
