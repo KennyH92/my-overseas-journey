@@ -33,9 +33,16 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Pencil, Trash2, Eye, FileText } from 'lucide-react';
+import { useExport } from '@/hooks/use-export';
+import { Pencil, Trash2, Eye, FileText, Download, FileSpreadsheet } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -59,6 +66,7 @@ export default function PatrolReports() {
   const [viewingReport, setViewingReport] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { exportToCSV, exportToPDF } = useExport();
 
   const form = useForm<ReportFormData>({
     resolver: zodResolver(reportSchema),
@@ -241,6 +249,44 @@ export default function PatrolReports() {
     return format(new Date(dateStr), 'yyyy-MM-dd HH:mm');
   };
 
+  const getStatusLabel = (status: string | null) => {
+    const labels: Record<string, string> = {
+      in_progress: '进行中',
+      completed: '已完成',
+      cancelled: '已取消',
+    };
+    return labels[status || 'in_progress'] || status || '进行中';
+  };
+
+  const handleExportCSV = () => {
+    const columns = [
+      { header: '计划名称', accessor: (row: any) => getPlanName(row.plan_id) },
+      { header: '保安', accessor: (row: any) => getGuardName(row.guard_id) },
+      { header: '站点', accessor: (row: any) => getSiteName(row.site_id) },
+      { header: '开始时间', accessor: (row: any) => formatDateTime(row.start_time) },
+      { header: '结束时间', accessor: (row: any) => formatDateTime(row.end_time) },
+      { header: '状态', accessor: (row: any) => getStatusLabel(row.status) },
+      { header: '备注', accessor: (row: any) => row.notes || '' },
+    ];
+    const filename = `巡更报告_${format(new Date(), 'yyyyMMdd_HHmmss')}`;
+    exportToCSV(reports, columns, filename);
+    toast({ title: '导出成功', description: 'CSV文件已下载' });
+  };
+
+  const handleExportPDF = () => {
+    const columns = [
+      { header: '计划名称', accessor: (row: any) => getPlanName(row.plan_id) },
+      { header: '保安', accessor: (row: any) => getGuardName(row.guard_id) },
+      { header: '站点', accessor: (row: any) => getSiteName(row.site_id) },
+      { header: '开始时间', accessor: (row: any) => formatDateTime(row.start_time) },
+      { header: '结束时间', accessor: (row: any) => formatDateTime(row.end_time) },
+      { header: '状态', accessor: (row: any) => getStatusLabel(row.status) },
+    ];
+    const filename = `巡更报告_${format(new Date(), 'yyyyMMdd_HHmmss')}`;
+    exportToPDF(reports, columns, filename, '巡更报告');
+    toast({ title: '导出成功', description: 'PDF文件已下载' });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -248,6 +294,24 @@ export default function PatrolReports() {
           <h1 className="text-2xl font-bold">巡更报告</h1>
           <p className="text-muted-foreground">查看和管理巡更执行记录</p>
         </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" disabled={reports.length === 0}>
+              <Download className="h-4 w-4 mr-2" />
+              导出
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={handleExportCSV}>
+              <FileSpreadsheet className="h-4 w-4 mr-2" />
+              导出为 CSV
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleExportPDF}>
+              <FileText className="h-4 w-4 mr-2" />
+              导出为 PDF
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <div className="rounded-md border">
