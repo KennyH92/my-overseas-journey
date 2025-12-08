@@ -22,6 +22,7 @@ import PatrolDetail from "./pages/PatrolDetail";
 import PatrolHistory from "./pages/PatrolHistory";
 import PatrolCharts from "./pages/PatrolCharts";
 import PatrolCalendar from "./pages/PatrolCalendar";
+import DataImport from "./pages/DataImport";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -174,7 +175,15 @@ const App = () => (
               path="/data/user"
               element={
                 <ProtectedRoute>
-                  <UserManagement />
+              <UserManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/data/import"
+              element={
+                <ProtectedRoute>
+                  <DataImport />
                 </ProtectedRoute>
               }
             />

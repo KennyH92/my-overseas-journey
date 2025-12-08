@@ -2,7 +2,7 @@ import {
   Home, Users, MapPin, ClipboardList, 
   FileText, Bell, Calendar, Shield,
   Database, Settings, UserCog, History,
-  BarChart3, CalendarDays
+  BarChart3, CalendarDays, Upload
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import {
@@ -35,6 +35,7 @@ const basicItems = [
 
 const dataItems = [
   { title: '设备管理', url: '/data/device', icon: Database },
+  { title: '数据导入', url: '/data/import', icon: Upload },
   { title: '系统管理', url: '/data/system', icon: Settings },
   { title: '角色权限', url: '/data/role', icon: UserCog },
   { title: '用户管理', url: '/data/user', icon: Users },
