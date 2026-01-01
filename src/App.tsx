@@ -24,6 +24,7 @@ import PatrolHistory from "./pages/PatrolHistory";
 import PatrolCharts from "./pages/PatrolCharts";
 import PatrolCalendar from "./pages/PatrolCalendar";
 import DataImport from "./pages/DataImport";
+import AttendanceReport from "./pages/AttendanceReport";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -193,6 +194,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <DataImport />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/data/attendance-report"
+              element={
+                <ProtectedRoute>
+                  <AttendanceReport />
                 </ProtectedRoute>
               }
             />
