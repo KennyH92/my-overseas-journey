@@ -93,6 +93,60 @@ export type Database = {
           },
         ]
       }
+      attendance: {
+        Row: {
+          check_in_time: string | null
+          check_out_time: string | null
+          created_at: string | null
+          date: string
+          guard_id: string
+          id: string
+          notes: string | null
+          project_id: string
+          shift_type: string
+          status: string | null
+        }
+        Insert: {
+          check_in_time?: string | null
+          check_out_time?: string | null
+          created_at?: string | null
+          date: string
+          guard_id: string
+          id?: string
+          notes?: string | null
+          project_id: string
+          shift_type: string
+          status?: string | null
+        }
+        Update: {
+          check_in_time?: string | null
+          check_out_time?: string | null
+          created_at?: string | null
+          date?: string
+          guard_id?: string
+          id?: string
+          notes?: string | null
+          project_id?: string
+          shift_type?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_guard_id_fkey"
+            columns: ["guard_id"]
+            isOneToOne: false
+            referencedRelation: "guards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       checkpoints: {
         Row: {
           code: string | null
@@ -520,6 +574,107 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      project_assignments: {
+        Row: {
+          created_at: string | null
+          guard_id: string
+          id: string
+          project_id: string
+          shift_type: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          guard_id: string
+          id?: string
+          project_id: string
+          shift_type: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          guard_id?: string
+          id?: string
+          project_id?: string
+          shift_type?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_assignments_guard_id_fkey"
+            columns: ["guard_id"]
+            isOneToOne: false
+            referencedRelation: "guards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_assignments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          address: string | null
+          code: string | null
+          company_id: string | null
+          contact_person: string | null
+          contact_phone: string | null
+          created_at: string | null
+          evening_shift_count: number | null
+          id: string
+          morning_shift_count: number | null
+          name: string
+          notes: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          code?: string | null
+          company_id?: string | null
+          contact_person?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          evening_shift_count?: number | null
+          id?: string
+          morning_shift_count?: number | null
+          name: string
+          notes?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          code?: string | null
+          company_id?: string | null
+          contact_person?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          evening_shift_count?: number | null
+          id?: string
+          morning_shift_count?: number | null
+          name?: string
+          notes?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sites: {
         Row: {
