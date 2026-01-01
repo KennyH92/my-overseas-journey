@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Sites from "./pages/Sites";
 import Checkpoints from "./pages/Checkpoints";
 import Guards from "./pages/Guards";
+import Projects from "./pages/Projects";
 import Notices from "./pages/Notices";
 import PatrolPlans from "./pages/PatrolPlans";
 import PatrolReports from "./pages/PatrolReports";
@@ -80,6 +81,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Guards />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/projects"
+              element={
+                <ProtectedRoute>
+                  <Projects />
                 </ProtectedRoute>
               }
             />
