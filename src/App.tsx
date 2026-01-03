@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/components/auth/AuthProvider";
 import { AppLayout } from "@/components/layout/AppLayout";
 import Login from "./pages/Login";
+import Install from "./pages/Install";
 import Dashboard from "./pages/Dashboard";
 import Sites from "./pages/Sites";
 import Checkpoints from "./pages/Checkpoints";
@@ -52,6 +53,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/install" element={<Install />} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route
               path="/dashboard"
