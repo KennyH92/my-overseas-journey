@@ -9,18 +9,19 @@ import { Label } from '@/components/ui/label';
 import { Cloud } from 'lucide-react';
 import { FloatingDevices } from '@/components/FloatingDevices';
 import { useAuth } from '@/components/auth/AuthProvider';
-
 export default function Login() {
-  const { user, signIn, loading } = useAuth();
+  const {
+    user,
+    signIn,
+    loading
+  } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberPassword, setRememberPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
   if (user && !loading) {
     return <Navigate to="/dashboard" replace />;
   }
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -30,9 +31,7 @@ export default function Login() {
       setIsLoading(false);
     }
   };
-
-  return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
+  return <div className="min-h-screen bg-background relative overflow-hidden">
       <FloatingDevices />
       
       <header className="absolute top-0 left-0 right-0 p-6 z-10">
@@ -53,34 +52,16 @@ export default function Login() {
             <TabsContent value="login">
               <form onSubmit={handleLogin} className="space-y-5">
                 <div className="space-y-2">
-                  <Input
-                    type="email"
-                    placeholder="邮箱地址"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="h-11"
-                    required
-                  />
+                  <Input type="email" placeholder="邮箱地址" value={email} onChange={e => setEmail(e.target.value)} className="h-11" required />
                 </div>
                 
                 <div className="space-y-2">
-                  <Input
-                    type="password"
-                    placeholder="密码"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="h-11"
-                    required
-                  />
+                  <Input type="password" placeholder="密码" value={password} onChange={e => setPassword(e.target.value)} className="h-11" required />
                 </div>
                 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="remember" 
-                      checked={rememberPassword}
-                      onCheckedChange={(checked) => setRememberPassword(checked as boolean)}
-                    />
+                    <Checkbox id="remember" checked={rememberPassword} onCheckedChange={checked => setRememberPassword(checked as boolean)} />
                     <Label htmlFor="remember" className="text-sm cursor-pointer">
                       记住密码
                     </Label>
@@ -90,11 +71,7 @@ export default function Login() {
                   </a>
                 </div>
                 
-                <Button 
-                  type="submit" 
-                  className="w-full h-11 text-base font-medium"
-                  disabled={isLoading}
-                >
+                <Button type="submit" className="w-full h-11 text-base font-medium" disabled={isLoading}>
                   {isLoading ? '登录中...' : '登录'}
                 </Button>
               </form>
@@ -111,8 +88,7 @@ export default function Login() {
       </div>
 
       <footer className="absolute bottom-0 left-0 right-0 p-6 text-center text-xs text-muted-foreground z-10">
-        <p>© 2001-2025 | All Rights Reserved | 辽ICP备11019552号 - 3 | JWM Hi-Tech Development Ltd. | Series cloud Version 2.1.0</p>
+        
       </footer>
-    </div>
-  );
+    </div>;
 }
