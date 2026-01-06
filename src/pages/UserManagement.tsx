@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Search, Users, UserPlus, Shield } from 'lucide-react';
+import { Search, Users, UserPlus, Shield, X, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -32,8 +32,16 @@ const roleBadgeVariant: Record<AppRole, 'destructive' | 'default' | 'secondary' 
 export default function UserManagement() {
   const [search, setSearch] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [registerDialogOpen, setRegisterDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [selectedRole, setSelectedRole] = useState<AppRole>('guard');
+  
+  // 注册新用户表单
+  const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUserPassword, setNewUserPassword] = useState('');
+  const [newUserFullName, setNewUserFullName] = useState('');
+  const [newUserRole, setNewUserRole] = useState<AppRole>('guard');
+  
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -67,11 +75,77 @@ export default function UserManagement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users-with-roles'] });
+      queryClient.invalidateQueries({ queryKey: ['role-counts'] });
       toast({ title: '角色分配成功' });
       setDialogOpen(false);
     },
     onError: () => {
       toast({ title: '角色分配失败', variant: 'destructive' });
+    },
+  });
+
+  const removeRoleMutation = useMutation({
+    mutationFn: async ({ userId, role }: { userId: string; role: AppRole }) => {
+      const { error } = await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', userId)
+        .eq('role', role);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users-with-roles'] });
+      queryClient.invalidateQueries({ queryKey: ['role-counts'] });
+      toast({ title: '角色已移除' });
+    },
+    onError: () => {
+      toast({ title: '移除角色失败', variant: 'destructive' });
+    },
+  });
+
+  const registerUserMutation = useMutation({
+    mutationFn: async ({ email, password, fullName, role }: { 
+      email: string; 
+      password: string; 
+      fullName: string;
+      role: AppRole;
+    }) => {
+      // 注册新用户
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: { full_name: fullName }
+        }
+      });
+      if (error) throw error;
+      if (!data.user) throw new Error('注册失败');
+
+      // 分配角色
+      const { error: roleError } = await supabase
+        .from('user_roles')
+        .insert({ user_id: data.user.id, role });
+      if (roleError) throw roleError;
+
+      return data.user;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users-with-roles'] });
+      queryClient.invalidateQueries({ queryKey: ['role-counts'] });
+      toast({ title: '用户注册成功' });
+      setRegisterDialogOpen(false);
+      setNewUserEmail('');
+      setNewUserPassword('');
+      setNewUserFullName('');
+      setNewUserRole('guard');
+    },
+    onError: (error: Error) => {
+      toast({ 
+        title: '用户注册失败', 
+        description: error.message,
+        variant: 'destructive' 
+      });
     },
   });
 
@@ -86,6 +160,27 @@ export default function UserManagement() {
     }
   };
 
+  const handleRemoveRole = (userId: string, role: AppRole) => {
+    removeRoleMutation.mutate({ userId, role });
+  };
+
+  const handleRegisterUser = () => {
+    if (!newUserEmail || !newUserPassword || !newUserFullName) {
+      toast({ title: '请填写所有必填字段', variant: 'destructive' });
+      return;
+    }
+    if (newUserPassword.length < 6) {
+      toast({ title: '密码至少需要6个字符', variant: 'destructive' });
+      return;
+    }
+    registerUserMutation.mutate({ 
+      email: newUserEmail, 
+      password: newUserPassword, 
+      fullName: newUserFullName,
+      role: newUserRole 
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -95,19 +190,84 @@ export default function UserManagement() {
 
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-4">
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
               用户列表
             </CardTitle>
-            <div className="relative w-64">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="搜索用户..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9"
-              />
+            <div className="flex items-center gap-3">
+              <div className="relative w-64">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="搜索用户..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              <Dialog open={registerDialogOpen} onOpenChange={setRegisterDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    注册新用户
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>注册新用户</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 pt-4">
+                    <div className="space-y-2">
+                      <Label>姓名 *</Label>
+                      <Input
+                        placeholder="请输入用户姓名"
+                        value={newUserFullName}
+                        onChange={(e) => setNewUserFullName(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>邮箱 *</Label>
+                      <Input
+                        type="email"
+                        placeholder="请输入邮箱地址"
+                        value={newUserEmail}
+                        onChange={(e) => setNewUserEmail(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>密码 *</Label>
+                      <Input
+                        type="password"
+                        placeholder="至少6个字符"
+                        value={newUserPassword}
+                        onChange={(e) => setNewUserPassword(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>初始角色</Label>
+                      <Select value={newUserRole} onValueChange={(v) => setNewUserRole(v as AppRole)}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="admin">管理员</SelectItem>
+                          <SelectItem value="manager">经理</SelectItem>
+                          <SelectItem value="supervisor">主管</SelectItem>
+                          <SelectItem value="guard">保安</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <Button 
+                      onClick={handleRegisterUser} 
+                      className="w-full"
+                      disabled={registerUserMutation.isPending}
+                    >
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      {registerUserMutation.isPending ? '注册中...' : '确认注册'}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </CardHeader>
@@ -141,8 +301,19 @@ export default function UserManagement() {
                         <div className="flex gap-1 flex-wrap">
                           {user.roles.length > 0 ? (
                             user.roles.map((role) => (
-                              <Badge key={role} variant={roleBadgeVariant[role as AppRole]}>
+                              <Badge 
+                                key={role} 
+                                variant={roleBadgeVariant[role as AppRole]}
+                                className="flex items-center gap-1"
+                              >
                                 {roleLabels[role as AppRole]}
+                                <button
+                                  onClick={() => handleRemoveRole(user.id, role as AppRole)}
+                                  className="ml-1 hover:text-destructive-foreground"
+                                  title="移除此角色"
+                                >
+                                  <X className="h-3 w-3" />
+                                </button>
                               </Badge>
                             ))
                           ) : (
@@ -183,9 +354,13 @@ export default function UserManagement() {
                                   </SelectContent>
                                 </Select>
                               </div>
-                              <Button onClick={handleAssignRole} className="w-full">
+                              <Button 
+                                onClick={handleAssignRole} 
+                                className="w-full"
+                                disabled={assignRoleMutation.isPending}
+                              >
                                 <UserPlus className="h-4 w-4 mr-2" />
-                                确认分配
+                                {assignRoleMutation.isPending ? '分配中...' : '确认分配'}
                               </Button>
                             </div>
                           </DialogContent>
