@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Search, Users, UserPlus, Shield, X, Plus } from 'lucide-react';
+import { UserImportDialog } from '@/components/user/UserImportDialog';
 import { useToast } from '@/hooks/use-toast';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -205,6 +206,7 @@ export default function UserManagement() {
                   className="pl-9"
                 />
               </div>
+              <UserImportDialog />
               <Dialog open={registerDialogOpen} onOpenChange={setRegisterDialogOpen}>
                 <DialogTrigger asChild>
                   <Button>
