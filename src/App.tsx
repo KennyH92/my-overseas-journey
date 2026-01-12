@@ -16,9 +16,7 @@ import Notices from "./pages/Notices";
 import PatrolPlans from "./pages/PatrolPlans";
 import PatrolReports from "./pages/PatrolReports";
 import Companies from "./pages/Companies";
-import DeviceManagement from "./pages/DeviceManagement";
 import SystemManagement from "./pages/SystemManagement";
-import RoleManagement from "./pages/RoleManagement";
 import UserManagement from "./pages/UserManagement";
 import PatrolDetail from "./pages/PatrolDetail";
 import PatrolHistory from "./pages/PatrolHistory";
@@ -160,14 +158,6 @@ const App = () => (
               }
             />
             <Route
-              path="/data/device"
-              element={
-                <ProtectedRoute>
-                  <DeviceManagement />
-                </ProtectedRoute>
-              }
-            />
-            <Route
               path="/data/system"
               element={
                 <ProtectedRoute>
@@ -176,18 +166,10 @@ const App = () => (
               }
             />
             <Route
-              path="/data/role"
-              element={
-                <ProtectedRoute>
-                  <RoleManagement />
-                </ProtectedRoute>
-              }
-            />
-            <Route
               path="/data/user"
               element={
                 <ProtectedRoute>
-              <UserManagement />
+                  <UserManagement />
                 </ProtectedRoute>
               }
             />
