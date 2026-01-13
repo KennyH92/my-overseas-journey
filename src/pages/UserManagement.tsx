@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Users, UserPlus, Shield, X, Plus, Eye, Settings, ClipboardList, Trash2 } from 'lucide-react';
+import { Search, Users, UserPlus, Shield, X, Plus, Eye, Trash2, Settings, ClipboardList } from 'lucide-react';
 import { UserImportDialog } from '@/components/user/UserImportDialog';
 import { useToast } from '@/hooks/use-toast';
 import type { Database } from '@/integrations/supabase/types';
@@ -83,6 +84,7 @@ export default function UserManagement() {
   const [newUserRole, setNewUserRole] = useState<AppRole>('guard');
   
   const { toast } = useToast();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const { data: users, isLoading } = useQuery({
@@ -428,6 +430,14 @@ export default function UserManagement() {
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => navigate(`/data/user/${user.id}`)}
+                              >
+                                <Eye className="h-4 w-4 mr-1" />
+                                详情
+                              </Button>
                               <Dialog open={dialogOpen && selectedUserId === user.id} onOpenChange={(open) => {
                                 setDialogOpen(open);
                                 if (open) setSelectedUserId(user.id);

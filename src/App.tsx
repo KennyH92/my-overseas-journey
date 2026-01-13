@@ -18,6 +18,7 @@ import PatrolReports from "./pages/PatrolReports";
 import Companies from "./pages/Companies";
 import SystemManagement from "./pages/SystemManagement";
 import UserManagement from "./pages/UserManagement";
+import UserDetail from "./pages/UserDetail";
 import PatrolDetail from "./pages/PatrolDetail";
 import PatrolHistory from "./pages/PatrolHistory";
 import PatrolCharts from "./pages/PatrolCharts";
@@ -170,6 +171,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <UserManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/data/user/:id"
+              element={
+                <ProtectedRoute>
+                  <UserDetail />
                 </ProtectedRoute>
               }
             />
