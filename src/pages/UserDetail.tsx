@@ -1,14 +1,20 @@
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowLeft, User, Shield, Phone, Calendar, Clock, MapPin, FileText, AlertTriangle } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { ArrowLeft, User, Shield, Phone, Calendar, Clock, MapPin, FileText, AlertTriangle, Pencil, Save, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
+import { useToast } from '@/hooks/use-toast';
 import type { Database } from '@/integrations/supabase/types';
 
 type AppRole = Database['public']['Enums']['app_role'];
@@ -27,9 +33,19 @@ const roleBadgeVariant: Record<AppRole, 'destructive' | 'default' | 'secondary' 
   guard: 'outline',
 };
 
+const allRoles: AppRole[] = ['admin', 'manager', 'supervisor', 'guard'];
+
 export default function UserDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Edit states
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editFullName, setEditFullName] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [editRoles, setEditRoles] = useState<AppRole[]>([]);
 
   // Fetch user profile with roles
   const { data: user, isLoading: userLoading } = useQuery({
@@ -65,6 +81,15 @@ export default function UserDetail() {
     },
     enabled: !!id,
   });
+
+  // Update edit states when user data changes
+  useEffect(() => {
+    if (user) {
+      setEditFullName(user.full_name || '');
+      setEditPhone(user.phone || '');
+      setEditRoles(user.roles as AppRole[]);
+    }
+  }, [user]);
 
   // Fetch patrol reports if user is a guard
   const { data: patrolReports } = useQuery({
@@ -120,6 +145,105 @@ export default function UserDetail() {
     enabled: !!user?.guard?.id,
   });
 
+  // Update user mutation
+  const updateUserMutation = useMutation({
+    mutationFn: async ({ fullName, phone, roles }: { fullName: string; phone: string; roles: AppRole[] }) => {
+      if (!id) throw new Error('用户ID不存在');
+
+      // Validate input
+      const trimmedName = fullName.trim();
+      const trimmedPhone = phone.trim();
+      
+      if (!trimmedName) {
+        throw new Error('姓名不能为空');
+      }
+      if (trimmedName.length > 100) {
+        throw new Error('姓名不能超过100个字符');
+      }
+      if (trimmedPhone && trimmedPhone.length > 20) {
+        throw new Error('电话号码不能超过20个字符');
+      }
+
+      // Update profile
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ 
+          full_name: trimmedName, 
+          phone: trimmedPhone || null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id);
+      if (profileError) throw profileError;
+
+      // Get current roles
+      const { data: currentRoles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', id);
+      if (rolesError) throw rolesError;
+
+      const currentRoleList = currentRoles?.map(r => r.role) || [];
+      
+      // Roles to add
+      const rolesToAdd = roles.filter(r => !currentRoleList.includes(r));
+      // Roles to remove
+      const rolesToRemove = currentRoleList.filter(r => !roles.includes(r as AppRole));
+
+      // Add new roles
+      if (rolesToAdd.length > 0) {
+        const { error: addError } = await supabase
+          .from('user_roles')
+          .insert(rolesToAdd.map(role => ({ user_id: id, role })));
+        if (addError) throw addError;
+      }
+
+      // Remove old roles
+      if (rolesToRemove.length > 0) {
+        const { error: removeError } = await supabase
+          .from('user_roles')
+          .delete()
+          .eq('user_id', id)
+          .in('role', rolesToRemove);
+        if (removeError) throw removeError;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-detail', id] });
+      queryClient.invalidateQueries({ queryKey: ['users-with-roles'] });
+      queryClient.invalidateQueries({ queryKey: ['role-counts'] });
+      toast({ title: '用户信息更新成功' });
+      setEditDialogOpen(false);
+    },
+    onError: (error: Error) => {
+      toast({ title: '更新失败', description: error.message, variant: 'destructive' });
+    },
+  });
+
+  const handleSaveEdit = () => {
+    updateUserMutation.mutate({
+      fullName: editFullName,
+      phone: editPhone,
+      roles: editRoles,
+    });
+  };
+
+  const handleRoleToggle = (role: AppRole) => {
+    setEditRoles(prev => 
+      prev.includes(role) 
+        ? prev.filter(r => r !== role)
+        : [...prev, role]
+    );
+  };
+
+  const handleOpenEditDialog = () => {
+    if (user) {
+      setEditFullName(user.full_name || '');
+      setEditPhone(user.phone || '');
+      setEditRoles(user.roles as AppRole[]);
+    }
+    setEditDialogOpen(true);
+  };
+
   if (userLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -153,14 +277,95 @@ export default function UserDetail() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/data/user')}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold">用户详情</h1>
-          <p className="text-muted-foreground">查看用户完整信息和操作记录</p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/data/user')}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold">用户详情</h1>
+            <p className="text-muted-foreground">查看用户完整信息和操作记录</p>
+          </div>
         </div>
+        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={handleOpenEditDialog}>
+              <Pencil className="h-4 w-4 mr-2" />
+              编辑用户
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>编辑用户信息</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label htmlFor="fullName">姓名 *</Label>
+                <Input
+                  id="fullName"
+                  value={editFullName}
+                  onChange={(e) => setEditFullName(e.target.value)}
+                  placeholder="请输入用户姓名"
+                  maxLength={100}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">电话</Label>
+                <Input
+                  id="phone"
+                  value={editPhone}
+                  onChange={(e) => setEditPhone(e.target.value)}
+                  placeholder="请输入电话号码"
+                  maxLength={20}
+                />
+              </div>
+              <Separator />
+              <div className="space-y-3">
+                <Label>角色分配</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  {allRoles.map((role) => (
+                    <div key={role} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`role-${role}`}
+                        checked={editRoles.includes(role)}
+                        onCheckedChange={() => handleRoleToggle(role)}
+                      />
+                      <label
+                        htmlFor={`role-${role}`}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      >
+                        <Badge variant={roleBadgeVariant[role]} className="ml-1">
+                          {roleLabels[role]}
+                        </Badge>
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                {editRoles.length === 0 && (
+                  <p className="text-sm text-muted-foreground">请至少选择一个角色</p>
+                )}
+              </div>
+              <div className="flex gap-2 pt-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setEditDialogOpen(false)}
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  取消
+                </Button>
+                <Button
+                  className="flex-1"
+                  onClick={handleSaveEdit}
+                  disabled={updateUserMutation.isPending || !editFullName.trim()}
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  {updateUserMutation.isPending ? '保存中...' : '保存'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* User Info Cards */}
@@ -184,7 +389,7 @@ export default function UserDetail() {
               </div>
               <div>
                 <h3 className="text-xl font-semibold">{user.full_name}</h3>
-                <div className="flex gap-1 mt-1">
+                <div className="flex gap-1 mt-1 flex-wrap">
                   {user.roles.length > 0 ? (
                     user.roles.map((role) => (
                       <Badge key={role} variant={roleBadgeVariant[role as AppRole]}>
