@@ -12,7 +12,8 @@ import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { ArrowLeft, User, Shield, Phone, Calendar, Clock, MapPin, FileText, AlertTriangle, Pencil, Save, X } from 'lucide-react';
+import { ArrowLeft, User, Shield, Phone, Calendar, Clock, MapPin, FileText, AlertTriangle, Pencil, Save, X, Mail, CreditCard, Globe } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
@@ -47,6 +48,12 @@ export default function UserDetail() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editFullName, setEditFullName] = useState('');
   const [editPhone, setEditPhone] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editBirthDate, setEditBirthDate] = useState('');
+  const [editIdNumber, setEditIdNumber] = useState('');
+  const [editIsForeignEmployee, setEditIsForeignEmployee] = useState(false);
+  const [editPassportExpiry, setEditPassportExpiry] = useState('');
+  const [editWorkPermitExpiry, setEditWorkPermitExpiry] = useState('');
   const [editRoles, setEditRoles] = useState<AppRole[]>([]);
 
   // Check if current user is an admin or manager
@@ -113,6 +120,12 @@ export default function UserDetail() {
     if (user) {
       setEditFullName(user.full_name || '');
       setEditPhone(user.phone || '');
+      setEditEmail(user.email || '');
+      setEditBirthDate(user.birth_date || '');
+      setEditIdNumber(user.id_number || '');
+      setEditIsForeignEmployee(user.is_foreign_employee || false);
+      setEditPassportExpiry(user.passport_expiry_date || '');
+      setEditWorkPermitExpiry(user.work_permit_expiry_date || '');
       setEditRoles(user.roles as AppRole[]);
     }
   }, [user]);
@@ -173,12 +186,36 @@ export default function UserDetail() {
 
   // Update user mutation
   const updateUserMutation = useMutation({
-    mutationFn: async ({ fullName, phone, roles, updateRoles }: { fullName: string; phone: string; roles: AppRole[]; updateRoles: boolean }) => {
+    mutationFn: async ({ 
+      fullName, 
+      phone, 
+      email,
+      birthDate,
+      idNumber,
+      isForeignEmployee,
+      passportExpiry,
+      workPermitExpiry,
+      roles, 
+      updateRoles 
+    }: { 
+      fullName: string; 
+      phone: string; 
+      email: string;
+      birthDate: string;
+      idNumber: string;
+      isForeignEmployee: boolean;
+      passportExpiry: string;
+      workPermitExpiry: string;
+      roles: AppRole[]; 
+      updateRoles: boolean;
+    }) => {
       if (!id) throw new Error('用户ID不存在');
 
       // Validate input
       const trimmedName = fullName.trim();
       const trimmedPhone = phone.trim();
+      const trimmedEmail = email.trim();
+      const trimmedIdNumber = idNumber.trim();
       
       if (!trimmedName) {
         throw new Error('姓名不能为空');
@@ -189,6 +226,12 @@ export default function UserDetail() {
       if (trimmedPhone && trimmedPhone.length > 20) {
         throw new Error('电话号码不能超过20个字符');
       }
+      if (trimmedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+        throw new Error('邮箱格式不正确');
+      }
+      if (trimmedIdNumber && trimmedIdNumber.length > 50) {
+        throw new Error('证件号码不能超过50个字符');
+      }
 
       // Update profile
       const { error: profileError } = await supabase
@@ -196,6 +239,12 @@ export default function UserDetail() {
         .update({ 
           full_name: trimmedName, 
           phone: trimmedPhone || null,
+          email: trimmedEmail || null,
+          birth_date: birthDate || null,
+          id_number: trimmedIdNumber || null,
+          is_foreign_employee: isForeignEmployee,
+          passport_expiry_date: isForeignEmployee && passportExpiry ? passportExpiry : null,
+          work_permit_expiry_date: isForeignEmployee && workPermitExpiry ? workPermitExpiry : null,
           updated_at: new Date().toISOString()
         })
         .eq('id', id);
@@ -252,6 +301,12 @@ export default function UserDetail() {
     updateUserMutation.mutate({
       fullName: editFullName,
       phone: editPhone,
+      email: editEmail,
+      birthDate: editBirthDate,
+      idNumber: editIdNumber,
+      isForeignEmployee: editIsForeignEmployee,
+      passportExpiry: editPassportExpiry,
+      workPermitExpiry: editWorkPermitExpiry,
       roles: editRoles,
       updateRoles: canEditRoles || false,
     });
@@ -269,6 +324,12 @@ export default function UserDetail() {
     if (user) {
       setEditFullName(user.full_name || '');
       setEditPhone(user.phone || '');
+      setEditEmail(user.email || '');
+      setEditBirthDate(user.birth_date || '');
+      setEditIdNumber(user.id_number || '');
+      setEditIsForeignEmployee(user.is_foreign_employee || false);
+      setEditPassportExpiry(user.passport_expiry_date || '');
+      setEditWorkPermitExpiry(user.work_permit_expiry_date || '');
       setEditRoles(user.roles as AppRole[]);
     }
     setEditDialogOpen(true);
@@ -325,7 +386,7 @@ export default function UserDetail() {
                 {isOwnProfile ? '编辑个人资料' : '编辑用户'}
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{isOwnProfile ? '编辑个人资料' : '编辑用户信息'}</DialogTitle>
               </DialogHeader>
@@ -336,20 +397,85 @@ export default function UserDetail() {
                     id="fullName"
                     value={editFullName}
                     onChange={(e) => setEditFullName(e.target.value)}
-                    placeholder="请输入用户姓名"
+                    placeholder="请输入姓名"
                     maxLength={100}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone">电话</Label>
+                  <Label htmlFor="birthDate">出生日期</Label>
+                  <Input
+                    id="birthDate"
+                    type="date"
+                    value={editBirthDate}
+                    onChange={(e) => setEditBirthDate(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="idNumber">身份证号/护照号码</Label>
+                  <Input
+                    id="idNumber"
+                    value={editIdNumber}
+                    onChange={(e) => setEditIdNumber(e.target.value)}
+                    placeholder="请输入证件号码"
+                    maxLength={50}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">手机号码</Label>
                   <Input
                     id="phone"
                     value={editPhone}
                     onChange={(e) => setEditPhone(e.target.value)}
-                    placeholder="请输入电话号码"
+                    placeholder="请输入手机号码"
                     maxLength={20}
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">邮箱</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={editEmail}
+                    onChange={(e) => setEditEmail(e.target.value)}
+                    placeholder="请输入邮箱地址"
+                    maxLength={255}
+                  />
+                </div>
+
+                <Separator />
+
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="isForeign" className="cursor-pointer">外籍员工</Label>
+                  <Switch
+                    id="isForeign"
+                    checked={editIsForeignEmployee}
+                    onCheckedChange={setEditIsForeignEmployee}
+                  />
+                </div>
+
+                {editIsForeignEmployee && (
+                  <div className="space-y-4 pl-4 border-l-2 border-primary/20">
+                    <div className="space-y-2">
+                      <Label htmlFor="passportExpiry">护照截止日期</Label>
+                      <Input
+                        id="passportExpiry"
+                        type="date"
+                        value={editPassportExpiry}
+                        onChange={(e) => setEditPassportExpiry(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="workPermitExpiry">准证截止日期</Label>
+                      <Input
+                        id="workPermitExpiry"
+                        type="date"
+                        value={editWorkPermitExpiry}
+                        onChange={(e) => setEditWorkPermitExpiry(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                )}
+
                 {canEditRoles && (
                   <>
                     <Separator />
@@ -443,21 +569,53 @@ export default function UserDetail() {
             
             <div className="grid gap-3">
               <div className="flex items-center gap-3">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <span className="text-muted-foreground">出生日期:</span>
+                <span>{user.birth_date ? formatDate(user.birth_date) : '未设置'}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <CreditCard className="h-4 w-4 text-muted-foreground" />
+                <span className="text-muted-foreground">证件号码:</span>
+                <span>{user.id_number || '未设置'}</span>
+              </div>
+              <div className="flex items-center gap-3">
                 <Phone className="h-4 w-4 text-muted-foreground" />
-                <span className="text-muted-foreground">电话:</span>
+                <span className="text-muted-foreground">手机号码:</span>
                 <span>{user.phone || '未设置'}</span>
               </div>
               <div className="flex items-center gap-3">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span className="text-muted-foreground">注册时间:</span>
-                <span>{formatDateTime(user.created_at)}</span>
+                <Mail className="h-4 w-4 text-muted-foreground" />
+                <span className="text-muted-foreground">邮箱:</span>
+                <span>{user.email || '未设置'}</span>
               </div>
               <div className="flex items-center gap-3">
                 <Clock className="h-4 w-4 text-muted-foreground" />
-                <span className="text-muted-foreground">最后更新:</span>
-                <span>{formatDateTime(user.updated_at)}</span>
+                <span className="text-muted-foreground">注册时间:</span>
+                <span>{formatDateTime(user.created_at)}</span>
               </div>
             </div>
+
+            {user.is_foreign_employee && (
+              <>
+                <Separator />
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Globe className="h-4 w-4 text-primary" />
+                    <span className="font-medium text-primary">外籍员工信息</span>
+                  </div>
+                  <div className="grid gap-3 pl-6">
+                    <div className="flex items-center gap-3">
+                      <span className="text-muted-foreground">护照截止日期:</span>
+                      <span>{user.passport_expiry_date ? formatDate(user.passport_expiry_date) : '未设置'}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-muted-foreground">准证截止日期:</span>
+                      <span>{user.work_permit_expiry_date ? formatDate(user.work_permit_expiry_date) : '未设置'}</span>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
 
