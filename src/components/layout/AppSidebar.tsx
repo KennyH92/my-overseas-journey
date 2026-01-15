@@ -2,7 +2,7 @@ import {
   Home, Users, MapPin, ClipboardList, 
   FileText, Bell, Calendar, Shield,
   Settings, UserCog, History,
-  BarChart3, CalendarDays, Upload, PieChart
+  BarChart3, CalendarDays, PieChart
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import {
@@ -34,7 +34,6 @@ const basicItems = [
 ];
 
 const dataItems = [
-  { title: '数据导入', url: '/data/import', icon: Upload },
   { title: '考勤统计', url: '/data/attendance-report', icon: PieChart },
   { title: '系统管理', url: '/data/system', icon: Settings },
   { title: '用户与权限', url: '/data/user', icon: UserCog },

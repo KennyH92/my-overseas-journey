@@ -23,7 +23,6 @@ import PatrolDetail from "./pages/PatrolDetail";
 import PatrolHistory from "./pages/PatrolHistory";
 import PatrolCharts from "./pages/PatrolCharts";
 import PatrolCalendar from "./pages/PatrolCalendar";
-import DataImport from "./pages/DataImport";
 import AttendanceReport from "./pages/AttendanceReport";
 import NotFound from "./pages/NotFound";
 
@@ -179,14 +178,6 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <UserDetail />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/data/import"
-              element={
-                <ProtectedRoute>
-                  <DataImport />
                 </ProtectedRoute>
               }
             />
