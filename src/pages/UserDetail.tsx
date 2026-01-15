@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/components/auth/AuthProvider';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -40,12 +41,37 @@ export default function UserDetail() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user: currentUser } = useAuth();
 
   // Edit states
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editFullName, setEditFullName] = useState('');
   const [editPhone, setEditPhone] = useState('');
   const [editRoles, setEditRoles] = useState<AppRole[]>([]);
+
+  // Check if current user is an admin or manager
+  const { data: isAdmin } = useQuery({
+    queryKey: ['is-admin-or-manager', currentUser?.id],
+    queryFn: async () => {
+      if (!currentUser?.id) return false;
+      const { data } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', currentUser.id)
+        .in('role', ['admin', 'manager']);
+      return (data?.length || 0) > 0;
+    },
+    enabled: !!currentUser?.id,
+  });
+
+  // Check if current user is viewing their own profile
+  const isOwnProfile = currentUser?.id === id;
+  
+  // Can edit if admin/manager OR viewing own profile
+  const canEdit = isAdmin || isOwnProfile;
+  
+  // Can edit roles only if admin
+  const canEditRoles = isAdmin;
 
   // Fetch user profile with roles
   const { data: user, isLoading: userLoading } = useQuery({
@@ -147,7 +173,7 @@ export default function UserDetail() {
 
   // Update user mutation
   const updateUserMutation = useMutation({
-    mutationFn: async ({ fullName, phone, roles }: { fullName: string; phone: string; roles: AppRole[] }) => {
+    mutationFn: async ({ fullName, phone, roles, updateRoles }: { fullName: string; phone: string; roles: AppRole[]; updateRoles: boolean }) => {
       if (!id) throw new Error('用户ID不存在');
 
       // Validate input
@@ -175,43 +201,46 @@ export default function UserDetail() {
         .eq('id', id);
       if (profileError) throw profileError;
 
-      // Get current roles
-      const { data: currentRoles, error: rolesError } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', id);
-      if (rolesError) throw rolesError;
-
-      const currentRoleList = currentRoles?.map(r => r.role) || [];
-      
-      // Roles to add
-      const rolesToAdd = roles.filter(r => !currentRoleList.includes(r));
-      // Roles to remove
-      const rolesToRemove = currentRoleList.filter(r => !roles.includes(r as AppRole));
-
-      // Add new roles
-      if (rolesToAdd.length > 0) {
-        const { error: addError } = await supabase
+      // Only update roles if user has permission (admin/manager)
+      if (updateRoles) {
+        // Get current roles
+        const { data: currentRoles, error: rolesError } = await supabase
           .from('user_roles')
-          .insert(rolesToAdd.map(role => ({ user_id: id, role })));
-        if (addError) throw addError;
-      }
+          .select('role')
+          .eq('user_id', id);
+        if (rolesError) throw rolesError;
 
-      // Remove old roles
-      if (rolesToRemove.length > 0) {
-        const { error: removeError } = await supabase
-          .from('user_roles')
-          .delete()
-          .eq('user_id', id)
-          .in('role', rolesToRemove);
-        if (removeError) throw removeError;
+        const currentRoleList = currentRoles?.map(r => r.role) || [];
+        
+        // Roles to add
+        const rolesToAdd = roles.filter(r => !currentRoleList.includes(r));
+        // Roles to remove
+        const rolesToRemove = currentRoleList.filter(r => !roles.includes(r as AppRole));
+
+        // Add new roles
+        if (rolesToAdd.length > 0) {
+          const { error: addError } = await supabase
+            .from('user_roles')
+            .insert(rolesToAdd.map(role => ({ user_id: id, role })));
+          if (addError) throw addError;
+        }
+
+        // Remove old roles
+        if (rolesToRemove.length > 0) {
+          const { error: removeError } = await supabase
+            .from('user_roles')
+            .delete()
+            .eq('user_id', id)
+            .in('role', rolesToRemove);
+          if (removeError) throw removeError;
+        }
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-detail', id] });
       queryClient.invalidateQueries({ queryKey: ['users-with-roles'] });
       queryClient.invalidateQueries({ queryKey: ['role-counts'] });
-      toast({ title: '用户信息更新成功' });
+      toast({ title: isOwnProfile ? '个人资料更新成功' : '用户信息更新成功' });
       setEditDialogOpen(false);
     },
     onError: (error: Error) => {
@@ -224,6 +253,7 @@ export default function UserDetail() {
       fullName: editFullName,
       phone: editPhone,
       roles: editRoles,
+      updateRoles: canEditRoles || false,
     });
   };
 
@@ -287,85 +317,91 @@ export default function UserDetail() {
             <p className="text-muted-foreground">查看用户完整信息和操作记录</p>
           </div>
         </div>
-        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={handleOpenEditDialog}>
-              <Pencil className="h-4 w-4 mr-2" />
-              编辑用户
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>编辑用户信息</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 pt-4">
-              <div className="space-y-2">
-                <Label htmlFor="fullName">姓名 *</Label>
-                <Input
-                  id="fullName"
-                  value={editFullName}
-                  onChange={(e) => setEditFullName(e.target.value)}
-                  placeholder="请输入用户姓名"
-                  maxLength={100}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">电话</Label>
-                <Input
-                  id="phone"
-                  value={editPhone}
-                  onChange={(e) => setEditPhone(e.target.value)}
-                  placeholder="请输入电话号码"
-                  maxLength={20}
-                />
-              </div>
-              <Separator />
-              <div className="space-y-3">
-                <Label>角色分配</Label>
-                <div className="grid grid-cols-2 gap-3">
-                  {allRoles.map((role) => (
-                    <div key={role} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`role-${role}`}
-                        checked={editRoles.includes(role)}
-                        onCheckedChange={() => handleRoleToggle(role)}
-                      />
-                      <label
-                        htmlFor={`role-${role}`}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                      >
-                        <Badge variant={roleBadgeVariant[role]} className="ml-1">
-                          {roleLabels[role]}
-                        </Badge>
-                      </label>
-                    </div>
-                  ))}
+        {canEdit && (
+          <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={handleOpenEditDialog}>
+                <Pencil className="h-4 w-4 mr-2" />
+                {isOwnProfile ? '编辑个人资料' : '编辑用户'}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>{isOwnProfile ? '编辑个人资料' : '编辑用户信息'}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 pt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">姓名 *</Label>
+                  <Input
+                    id="fullName"
+                    value={editFullName}
+                    onChange={(e) => setEditFullName(e.target.value)}
+                    placeholder="请输入用户姓名"
+                    maxLength={100}
+                  />
                 </div>
-                {editRoles.length === 0 && (
-                  <p className="text-sm text-muted-foreground">请至少选择一个角色</p>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">电话</Label>
+                  <Input
+                    id="phone"
+                    value={editPhone}
+                    onChange={(e) => setEditPhone(e.target.value)}
+                    placeholder="请输入电话号码"
+                    maxLength={20}
+                  />
+                </div>
+                {canEditRoles && (
+                  <>
+                    <Separator />
+                    <div className="space-y-3">
+                      <Label>角色分配</Label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {allRoles.map((role) => (
+                          <div key={role} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`role-${role}`}
+                              checked={editRoles.includes(role)}
+                              onCheckedChange={() => handleRoleToggle(role)}
+                            />
+                            <label
+                              htmlFor={`role-${role}`}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                            >
+                              <Badge variant={roleBadgeVariant[role]} className="ml-1">
+                                {roleLabels[role]}
+                              </Badge>
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                      {editRoles.length === 0 && (
+                        <p className="text-sm text-muted-foreground">请至少选择一个角色</p>
+                      )}
+                    </div>
+                  </>
                 )}
+                <div className="flex gap-2 pt-2">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => setEditDialogOpen(false)}
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    取消
+                  </Button>
+                  <Button
+                    className="flex-1"
+                    onClick={handleSaveEdit}
+                    disabled={updateUserMutation.isPending || !editFullName.trim()}
+                  >
+                    <Save className="h-4 w-4 mr-2" />
+                    {updateUserMutation.isPending ? '保存中...' : '保存'}
+                  </Button>
+                </div>
               </div>
-              <div className="flex gap-2 pt-2">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => setEditDialogOpen(false)}
-                >
-                  <X className="h-4 w-4 mr-2" />
-                  取消
-                </Button>
-                <Button
-                  className="flex-1"
-                  onClick={handleSaveEdit}
-                  disabled={updateUserMutation.isPending || !editFullName.trim()}
-                >
-                  <Save className="h-4 w-4 mr-2" />
-                  {updateUserMutation.isPending ? '保存中...' : '保存'}
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
 
       {/* User Info Cards */}
