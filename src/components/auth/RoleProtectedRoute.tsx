@@ -1,6 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useHasRole, type AppRole } from '@/hooks/use-user-roles';
+import { FirstLoginCheck } from '@/components/auth/FirstLoginCheck';
 import { AppLayout } from '@/components/layout/AppLayout';
 
 interface RoleProtectedRouteProps {
@@ -31,5 +32,9 @@ export function RoleProtectedRoute({ children, allowedRoles = [] }: RoleProtecte
     return <Navigate to="/dashboard" replace />;
   }
 
-  return <AppLayout>{children}</AppLayout>;
+  return (
+    <FirstLoginCheck>
+      <AppLayout>{children}</AppLayout>
+    </FirstLoginCheck>
+  );
 }

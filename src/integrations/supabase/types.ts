@@ -554,9 +554,11 @@ export type Database = {
           birth_date: string | null
           created_at: string | null
           email: string | null
+          employee_id: string | null
           full_name: string
           id: string
           id_number: string | null
+          is_first_login: boolean | null
           is_foreign_employee: boolean | null
           passport_expiry_date: string | null
           phone: string | null
@@ -568,9 +570,11 @@ export type Database = {
           birth_date?: string | null
           created_at?: string | null
           email?: string | null
+          employee_id?: string | null
           full_name: string
           id: string
           id_number?: string | null
+          is_first_login?: boolean | null
           is_foreign_employee?: boolean | null
           passport_expiry_date?: string | null
           phone?: string | null
@@ -582,9 +586,11 @@ export type Database = {
           birth_date?: string | null
           created_at?: string | null
           email?: string | null
+          employee_id?: string | null
           full_name?: string
           id?: string
           id_number?: string | null
+          is_first_login?: boolean | null
           is_foreign_employee?: boolean | null
           passport_expiry_date?: string | null
           phone?: string | null
@@ -770,12 +776,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_next_staff_id: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      setup_guard_profile: {
+        Args: {
+          _email?: string
+          _full_name: string
+          _phone?: string
+          _user_id: string
+        }
+        Returns: {
+          employee_id: string
+          full_name: string
+        }[]
       }
     }
     Enums: {
