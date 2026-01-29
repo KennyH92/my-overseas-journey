@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/components/auth/AuthProvider";
+import { RoleProtectedRoute } from "@/components/auth/RoleProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
 import Login from "./pages/Login";
 import Install from "./pages/Install";
@@ -32,7 +33,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
   if (!user) {
@@ -160,25 +165,25 @@ const App = () => (
             <Route
               path="/data/system"
               element={
-                <ProtectedRoute>
+                <RoleProtectedRoute allowedRoles={['admin', 'manager']}>
                   <SystemManagement />
-                </ProtectedRoute>
+                </RoleProtectedRoute>
               }
             />
             <Route
               path="/data/user"
               element={
-                <ProtectedRoute>
+                <RoleProtectedRoute allowedRoles={['admin', 'manager']}>
                   <UserManagement />
-                </ProtectedRoute>
+                </RoleProtectedRoute>
               }
             />
             <Route
               path="/data/user/:id"
               element={
-                <ProtectedRoute>
+                <RoleProtectedRoute allowedRoles={['admin', 'manager']}>
                   <UserDetail />
-                </ProtectedRoute>
+                </RoleProtectedRoute>
               }
             />
             <Route
