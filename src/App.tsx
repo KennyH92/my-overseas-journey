@@ -5,9 +5,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/components/auth/AuthProvider";
 import { RoleProtectedRoute } from "@/components/auth/RoleProtectedRoute";
+import { FirstLoginCheck } from "@/components/auth/FirstLoginCheck";
 import { AppLayout } from "@/components/layout/AppLayout";
 import Login from "./pages/Login";
 import Install from "./pages/Install";
+import ChangePassword from "./pages/ChangePassword";
 import Dashboard from "./pages/Dashboard";
 import Sites from "./pages/Sites";
 import Checkpoints from "./pages/Checkpoints";
@@ -29,6 +31,25 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+// Simple auth-only route without first login check (for change-password page)
+function AuthOnlyRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
+}
+
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
 
@@ -44,7 +65,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/login" replace />;
   }
 
-  return <AppLayout>{children}</AppLayout>;
+  return (
+    <FirstLoginCheck>
+      <AppLayout>{children}</AppLayout>
+    </FirstLoginCheck>
+  );
 }
 
 const App = () => (
@@ -57,6 +82,14 @@ const App = () => (
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/install" element={<Install />} />
+            <Route 
+              path="/change-password" 
+              element={
+                <AuthOnlyRoute>
+                  <ChangePassword />
+                </AuthOnlyRoute>
+              } 
+            />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route
               path="/dashboard"

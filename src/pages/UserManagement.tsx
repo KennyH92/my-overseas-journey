@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, Users, UserPlus, Shield, X, Plus, Eye, Trash2, Settings, ClipboardList } from 'lucide-react';
 import { UserImportDialog } from '@/components/user/UserImportDialog';
+import { GuardRegistrationDialog } from '@/components/user/GuardRegistrationDialog';
 import { useToast } from '@/hooks/use-toast';
 import type { Database } from '@/integrations/supabase/types';
 import {
@@ -237,7 +238,8 @@ export default function UserManagement() {
 
   const filteredUsers = users?.filter(user =>
     user.full_name.toLowerCase().includes(search.toLowerCase()) ||
-    user.phone?.includes(search)
+    user.phone?.includes(search) ||
+    user.employee_id?.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleAssignRole = () => {
@@ -308,6 +310,7 @@ export default function UserManagement() {
                       className="pl-9"
                     />
                   </div>
+                  <GuardRegistrationDialog />
                   <UserImportDialog />
                   <Dialog open={registerDialogOpen} onOpenChange={setRegisterDialogOpen}>
                     <DialogTrigger asChild>
@@ -382,6 +385,7 @@ export default function UserManagement() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead>工号</TableHead>
                       <TableHead>用户名</TableHead>
                       <TableHead>电话</TableHead>
                       <TableHead>角色</TableHead>
@@ -392,13 +396,16 @@ export default function UserManagement() {
                   <TableBody>
                     {filteredUsers?.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center text-muted-foreground">
+                        <TableCell colSpan={6} className="text-center text-muted-foreground">
                           暂无用户数据
                         </TableCell>
                       </TableRow>
                     ) : (
                       filteredUsers?.map((user) => (
                         <TableRow key={user.id}>
+                          <TableCell className="font-mono text-primary">
+                            {user.employee_id || '-'}
+                          </TableCell>
                           <TableCell className="font-medium">{user.full_name}</TableCell>
                           <TableCell>{user.phone || '-'}</TableCell>
                           <TableCell>
