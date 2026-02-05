@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Lock, Shield, AlertTriangle } from 'lucide-react';
+import { Lock, Shield, AlertTriangle, KeyRound } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function ChangePassword() {
@@ -22,7 +22,7 @@ export default function ChangePassword() {
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!newPassword || !confirmPassword) {
+    if (!currentPassword || !newPassword || !confirmPassword) {
       toast({
         title: '请填写所有字段',
         variant: 'destructive',
@@ -46,6 +46,14 @@ export default function ChangePassword() {
       return;
     }
 
+    if (currentPassword === newPassword) {
+      toast({
+        title: '新密码不能与当前密码相同',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     // Check password complexity
     const hasUpperCase = /[A-Z]/.test(newPassword);
     const hasLowerCase = /[a-z]/.test(newPassword);
@@ -63,7 +71,23 @@ export default function ChangePassword() {
     setIsLoading(true);
 
     try {
-      // Update password
+      // First, reauthenticate with current password
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user?.email || '',
+        password: currentPassword,
+      });
+
+      if (signInError) {
+        toast({
+          title: '当前密码错误',
+          description: '请输入正确的当前密码',
+          variant: 'destructive',
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Now update password
       const { error: updateError } = await supabase.auth.updateUser({
         password: newPassword,
       });
@@ -119,6 +143,25 @@ export default function ChangePassword() {
           </Alert>
           
           <form onSubmit={handleChangePassword} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="currentPassword">当前密码</Label>
+              <div className="relative">
+                <KeyRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="currentPassword"
+                  type="password"
+                  placeholder="请输入当前密码"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  className="pl-10"
+                  required
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                初始密码为 1234abcd
+              </p>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="newPassword">新密码</Label>
               <div className="relative">
