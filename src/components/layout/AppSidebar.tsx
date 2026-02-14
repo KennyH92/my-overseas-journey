@@ -20,7 +20,7 @@ import {
 const setupItems = [
   { title: '公司设置', url: '/companies', icon: Users },
   { title: '顾客/项目', url: '/projects', icon: Shield },
-  { title: '保安设备', url: '/sites', icon: MapPin },
+  { title: '站点管理', url: '/sites', icon: MapPin },
   { title: '巡更内容', url: '/checkpoints', icon: ClipboardList },
   { title: '巡更计划', url: '/setup/plan', icon: Calendar },
   { title: '消息中心', url: '/notices', icon: Bell },
