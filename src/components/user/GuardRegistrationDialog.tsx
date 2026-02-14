@@ -24,7 +24,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { UserPlus, Copy, CheckCircle2 } from 'lucide-react';
 
-const DEFAULT_PASSWORD = '1234abcd';
+const DEFAULT_PASSWORD = 'Tssb@2026!';
 
 interface GuardRegistrationDialogProps {
   onSuccess?: () => void;

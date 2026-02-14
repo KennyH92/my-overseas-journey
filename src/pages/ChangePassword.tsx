@@ -158,7 +158,7 @@ export default function ChangePassword() {
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                初始密码为 1234abcd
+                初始密码为 Tssb@2026!
               </p>
             </div>
 
