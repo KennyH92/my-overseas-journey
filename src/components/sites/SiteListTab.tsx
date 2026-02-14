@@ -13,7 +13,8 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, MapPin } from 'lucide-react';
+import { Plus, Pencil, Trash2, MapPin, QrCode, Download } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -37,6 +38,7 @@ type SiteFormData = z.infer<typeof siteSchema>;
 export default function SiteListTab() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingSite, setEditingSite] = useState<any>(null);
+  const [qrSite, setQrSite] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -175,8 +177,8 @@ export default function SiteListTab() {
               <TableHead>所属公司</TableHead>
               <TableHead>地址</TableHead>
               <TableHead>位置</TableHead>
+              <TableHead>二维码</TableHead>
               <TableHead>状态</TableHead>
-              <TableHead className="text-right">操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -204,6 +206,11 @@ export default function SiteListTab() {
                         </span>
                       </div>
                     ) : '-'}
+                  </TableCell>
+                  <TableCell>
+                    <Button variant="ghost" size="icon" onClick={() => setQrSite(site)}>
+                      <QrCode className="w-4 h-4" />
+                    </Button>
                   </TableCell>
                   <TableCell>
                     <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
@@ -329,6 +336,49 @@ export default function SiteListTab() {
           </Form>
         </DialogContent>
       </Dialog>
+
+      {qrSite && (
+        <Dialog open={!!qrSite} onOpenChange={() => setQrSite(null)}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>站点签到二维码</DialogTitle>
+              <DialogDescription>{qrSite.name}</DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-col items-center gap-4 py-4">
+              <div id="site-qr-code" className="bg-white p-4 rounded-lg">
+                <QRCodeSVG
+                  value={JSON.stringify({ type: 'site_checkin', site_id: qrSite.id, site_name: qrSite.name, code: qrSite.code })}
+                  size={200}
+                  level="H"
+                />
+              </div>
+              <p className="text-sm text-muted-foreground text-center">保安扫描此二维码进行打卡签到</p>
+              <Button onClick={() => {
+                const svg = document.querySelector('#site-qr-code svg') as SVGSVGElement;
+                if (!svg) return;
+                const canvas = document.createElement('canvas');
+                canvas.width = 250; canvas.height = 250;
+                const ctx = canvas.getContext('2d')!;
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(0, 0, 250, 250);
+                const img = new Image();
+                const svgData = new XMLSerializer().serializeToString(svg);
+                img.onload = () => {
+                  ctx.drawImage(img, 25, 25, 200, 200);
+                  const a = document.createElement('a');
+                  a.download = `site-${qrSite.name}-qr.png`;
+                  a.href = canvas.toDataURL('image/png');
+                  a.click();
+                };
+                img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+              }}>
+                <Download className="w-4 h-4 mr-2" />
+                下载二维码
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
