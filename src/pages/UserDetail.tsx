@@ -13,6 +13,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ArrowLeft, User, Shield, Phone, Calendar, Clock, MapPin, FileText, AlertTriangle, Pencil, Save, X, Mail, CreditCard, Globe } from 'lucide-react';
+import { maskIdNumber, maskPhone } from '@/lib/data-masking';
 import { Switch } from '@/components/ui/switch';
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
@@ -574,12 +575,12 @@ export default function UserDetail() {
               <div className="flex items-center gap-3">
                 <CreditCard className="h-4 w-4 text-muted-foreground" />
                 <span className="text-muted-foreground">证件号码:</span>
-                <span>{user.id_number || '未设置'}</span>
+                <span>{isAdmin ? (user.id_number || '未设置') : maskIdNumber(user.id_number)}</span>
               </div>
               <div className="flex items-center gap-3">
                 <Phone className="h-4 w-4 text-muted-foreground" />
                 <span className="text-muted-foreground">手机号码:</span>
-                <span>{user.phone || '未设置'}</span>
+                <span>{isAdmin ? (user.phone || '未设置') : maskPhone(user.phone)}</span>
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="h-4 w-4 text-muted-foreground" />
