@@ -326,14 +326,14 @@ export default function PatrolPlans() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>负责保安</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select onValueChange={(val) => field.onChange(val === 'none' ? '' : val)} value={field.value || 'none'}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="选择保安" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="">不指定</SelectItem>
+                            <SelectItem value="none">不指定</SelectItem>
                             {guards.map((guard) => (
                               <SelectItem key={guard.id} value={guard.id}>
                                 {guard.name}
