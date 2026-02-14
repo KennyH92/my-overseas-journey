@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { format } from 'date-fns';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -46,8 +47,6 @@ const planSchema = z.object({
   name: z.string().min(1, '请输入计划名称'),
   site_id: z.string().min(1, '请选择站点'),
   guard_id: z.string().optional(),
-  start_date: z.string().min(1, '请选择开始日期'),
-  end_date: z.string().min(1, '请选择结束日期'),
   frequency: z.string().optional(),
   notes: z.string().optional(),
   status: z.string().default('active'),
@@ -67,8 +66,6 @@ export default function PatrolPlans() {
       name: '',
       site_id: '',
       guard_id: '',
-      start_date: '',
-      end_date: '',
       frequency: '',
       notes: '',
       status: 'active',
@@ -113,12 +110,13 @@ export default function PatrolPlans() {
 
   const createMutation = useMutation({
     mutationFn: async (data: PlanFormData) => {
+      const today = format(new Date(), 'yyyy-MM-dd');
       const { error } = await supabase.from('patrol_plans').insert({
         name: data.name,
         site_id: data.site_id,
         guard_id: data.guard_id || null,
-        start_date: data.start_date,
-        end_date: data.end_date,
+        start_date: today,
+        end_date: '2099-12-31',
         frequency: data.frequency || null,
         notes: data.notes || null,
         status: data.status,
@@ -144,8 +142,6 @@ export default function PatrolPlans() {
           name: data.name,
           site_id: data.site_id,
           guard_id: data.guard_id || null,
-          start_date: data.start_date,
-          end_date: data.end_date,
           frequency: data.frequency || null,
           notes: data.notes || null,
           status: data.status,
@@ -193,8 +189,6 @@ export default function PatrolPlans() {
       name: plan.name,
       site_id: plan.site_id,
       guard_id: plan.guard_id || '',
-      start_date: plan.start_date,
-      end_date: plan.end_date,
       frequency: plan.frequency || '',
       notes: plan.notes || '',
       status: plan.status,
@@ -331,35 +325,6 @@ export default function PatrolPlans() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="start_date"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>开始日期 *</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="end_date"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>结束日期 *</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
@@ -435,8 +400,7 @@ export default function PatrolPlans() {
               <TableHead>计划名称</TableHead>
               <TableHead>站点</TableHead>
               <TableHead>负责保安</TableHead>
-              <TableHead>日期范围</TableHead>
-              
+              <TableHead>巡更间隔</TableHead>
               <TableHead>巡更间隔</TableHead>
               <TableHead>状态</TableHead>
               <TableHead className="text-right">操作</TableHead>
@@ -445,13 +409,13 @@ export default function PatrolPlans() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8">
+                <TableCell colSpan={6} className="text-center py-8">
                   加载中...
                 </TableCell>
               </TableRow>
             ) : plans.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                   暂无巡更计划
                 </TableCell>
               </TableRow>
@@ -461,9 +425,6 @@ export default function PatrolPlans() {
                   <TableCell className="font-medium">{plan.name}</TableCell>
                   <TableCell>{getSiteName(plan.site_id)}</TableCell>
                   <TableCell>{getGuardName(plan.guard_id)}</TableCell>
-                  <TableCell>
-                    {plan.start_date} ~ {plan.end_date}
-                  </TableCell>
                   <TableCell>{getFrequencyLabel(plan.frequency)}</TableCell>
                   <TableCell>{getStatusBadge(plan.status || 'active')}</TableCell>
                   <TableCell className="text-right">
