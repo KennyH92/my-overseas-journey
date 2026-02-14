@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
-import { Users, UserCheck, UserX, Clock, TrendingUp, Calendar } from "lucide-react";
+import { Users, UserCheck, UserX, Clock, TrendingUp, Calendar, AlertTriangle } from "lucide-react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isWeekend } from "date-fns";
 import { zhCN } from "date-fns/locale";
 
@@ -64,6 +64,22 @@ export default function AttendanceReport() {
         query = query.eq("project_id", selectedProject);
       }
       const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  // Query anomalous site_attendance records for the month
+  const { data: anomalousRecords = [] } = useQuery({
+    queryKey: ["site-attendance-anomalous", selectedYear, selectedMonth],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("site_attendance")
+        .select("*, guards(name, employee_id), sites(name)")
+        .in("status", ["system_auto_closed", "late_close"])
+        .gte("date", format(monthStart, "yyyy-MM-dd"))
+        .lte("date", format(monthEnd, "yyyy-MM-dd"))
+        .order("date", { ascending: false });
       if (error) throw error;
       return data || [];
     },
@@ -433,6 +449,53 @@ export default function AttendanceReport() {
               </Table>
             </CardContent>
           </Card>
+          {/* Anomalous Site Attendance Records */}
+          {anomalousRecords.length > 0 && (
+            <Card className="border-destructive/30">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-destructive">
+                  <AlertTriangle className="h-5 w-5" />
+                  站点考勤异常记录（需人工复核）
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>日期</TableHead>
+                      <TableHead>姓名</TableHead>
+                      <TableHead>工号</TableHead>
+                      <TableHead>站点</TableHead>
+                      <TableHead className="text-center">签到</TableHead>
+                      <TableHead className="text-center">签退</TableHead>
+                      <TableHead className="text-center">状态</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {anomalousRecords.map((r: any) => (
+                      <TableRow key={r.id} className="bg-destructive/5">
+                        <TableCell>{r.date}</TableCell>
+                        <TableCell className="font-medium">{r.guards?.name || '-'}</TableCell>
+                        <TableCell>{r.guards?.employee_id || '-'}</TableCell>
+                        <TableCell>{r.sites?.name || '-'}</TableCell>
+                        <TableCell className="text-center">
+                          {r.check_in_time ? format(new Date(r.check_in_time), 'HH:mm') : '-'}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {r.check_out_time ? format(new Date(r.check_out_time), 'HH:mm') : '-'}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant="destructive" className="text-xs">
+                            {r.status === 'system_auto_closed' ? '系统截断' : '补签退'}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          )}
         </>
       )}
     </div>
