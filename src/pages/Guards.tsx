@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -63,6 +64,7 @@ const guardSchema = z.object({
 type GuardFormData = z.infer<typeof guardSchema>;
 
 export default function Guards() {
+  const { t } = useTranslation();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedGuard, setSelectedGuard] = useState<any>(null);
@@ -124,13 +126,13 @@ export default function Guards() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["guards"] });
-      toast({ title: "Guard created successfully" });
+      toast({ title: t('common.createSuccess') });
       setIsDialogOpen(false);
       form.reset();
     },
     onError: (error: any) => {
       toast({
-        title: "Error creating guard",
+        title: t('common.createFailed'),
         description: error.message,
         variant: "destructive",
       });
@@ -153,14 +155,14 @@ export default function Guards() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["guards"] });
-      toast({ title: "Guard updated successfully" });
+      toast({ title: t('common.updateSuccess') });
       setIsDialogOpen(false);
       setSelectedGuard(null);
       form.reset();
     },
     onError: (error: any) => {
       toast({
-        title: "Error updating guard",
+        title: t('common.updateFailed'),
         description: error.message,
         variant: "destructive",
       });
@@ -174,13 +176,13 @@ export default function Guards() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["guards"] });
-      toast({ title: "Guard deleted successfully" });
+      toast({ title: t('common.deleteSuccess') });
       setIsDeleteDialogOpen(false);
       setSelectedGuard(null);
     },
     onError: (error: any) => {
       toast({
-        title: "Error deleting guard",
+        title: t('common.deleteFailed'),
         description: error.message,
         variant: "destructive",
       });
@@ -228,35 +230,35 @@ export default function Guards() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Guards Management</h1>
-          <p className="text-muted-foreground">Manage guard information and assignments</p>
+          <h1 className="text-3xl font-bold">{t('guards.title')}</h1>
+          <p className="text-muted-foreground">{t('guards.description')}</p>
         </div>
         <Button onClick={handleAdd}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Guard
+          {t('guards.addGuard')}
         </Button>
       </div>
 
       {isLoading ? (
-        <div>Loading...</div>
+        <div>{t('common.loading')}</div>
       ) : (
         <div className="border rounded-lg">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Employee ID</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Company</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{t('common.name')}</TableHead>
+                <TableHead>{t('common.employeeId')}</TableHead>
+                <TableHead>{t('common.phone')}</TableHead>
+                <TableHead>{t('guards.company')}</TableHead>
+                <TableHead>{t('common.status')}</TableHead>
+                <TableHead className="text-right">{t('common.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {guards.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center text-muted-foreground">
-                    No guards found. Add your first guard to get started.
+                    {t('guards.noGuards')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -268,7 +270,7 @@ export default function Guards() {
                     <TableCell>{guard.companies?.name || "-"}</TableCell>
                     <TableCell>
                       <Badge variant={guard.status === "active" ? "default" : "secondary"}>
-                        {guard.status}
+                        {guard.status === "active" ? t('common.active') : t('common.inactive')}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
@@ -298,11 +300,9 @@ export default function Guards() {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{selectedGuard ? "Edit Guard" : "Add Guard"}</DialogTitle>
+            <DialogTitle>{selectedGuard ? t('guards.editGuard') : t('guards.addGuard')}</DialogTitle>
             <DialogDescription>
-              {selectedGuard
-                ? "Update guard information and assignment"
-                : "Add a new guard to the system"}
+              {selectedGuard ? t('guards.editGuardDesc') : t('guards.addGuardDesc')}
             </DialogDescription>
           </DialogHeader>
           <Form {...form}>
@@ -312,9 +312,9 @@ export default function Guards() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Name</FormLabel>
+                    <FormLabel>{t('guards.guardName')}</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Enter guard name" />
+                      <Input {...field} placeholder={t('guards.enterName')} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -326,9 +326,9 @@ export default function Guards() {
                 name="employee_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Employee ID</FormLabel>
+                    <FormLabel>{t('common.employeeId')}</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Enter employee ID" />
+                      <Input {...field} placeholder={t('guards.enterEmployeeId')} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -340,9 +340,9 @@ export default function Guards() {
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone</FormLabel>
+                    <FormLabel>{t('common.phone')}</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Enter phone number" />
+                      <Input {...field} placeholder={t('guards.enterPhone')} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -354,15 +354,15 @@ export default function Guards() {
                 name="company_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Company</FormLabel>
+                    <FormLabel>{t('guards.company')}</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a company" />
+                          <SelectValue placeholder={t('guards.selectCompany')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="none">No Company</SelectItem>
+                        <SelectItem value="none">{t('common.noCompany')}</SelectItem>
                         {companies.map((company) => (
                           <SelectItem key={company.id} value={company.id}>
                             {company.name}
@@ -380,7 +380,7 @@ export default function Guards() {
                 name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Status</FormLabel>
+                    <FormLabel>{t('common.status')}</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -388,8 +388,8 @@ export default function Guards() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="inactive">Inactive</SelectItem>
+                        <SelectItem value="active">{t('common.active')}</SelectItem>
+                        <SelectItem value="inactive">{t('common.inactive')}</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -403,10 +403,10 @@ export default function Guards() {
                   variant="outline"
                   onClick={() => setIsDialogOpen(false)}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
                 <Button type="submit">
-                  {selectedGuard ? "Update" : "Create"}
+                  {selectedGuard ? t('common.update') : t('common.create')}
                 </Button>
               </DialogFooter>
             </form>
@@ -417,18 +417,18 @@ export default function Guards() {
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('common.confirmDelete')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the guard "{selectedGuard?.name}".
-              This action cannot be undone.
+              {t('guards.deleteConfirm', { name: selectedGuard?.name })}
+              {' '}{t('common.cannotUndo')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => selectedGuard && deleteMutation.mutate(selectedGuard.id)}
             >
-              Delete
+              {t('common.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
