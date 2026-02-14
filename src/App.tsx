@@ -12,6 +12,7 @@ import Install from "./pages/Install";
 import ChangePassword from "./pages/ChangePassword";
 import Dashboard from "./pages/Dashboard";
 import Sites from "./pages/Sites";
+import ScanCheckIn from "./pages/ScanCheckIn";
 // Checkpoints is now integrated into Sites page
 import Guards from "./pages/Guards";
 import Projects from "./pages/Projects";
@@ -109,6 +110,14 @@ const App = () => (
             />
             {/* /checkpoints now redirects to /sites */}
             <Route path="/checkpoints" element={<Navigate to="/sites" replace />} />
+            <Route
+              path="/scan-checkin"
+              element={
+                <ProtectedRoute>
+                  <ScanCheckIn />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/guards"
               element={

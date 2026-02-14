@@ -700,6 +700,69 @@ export type Database = {
           },
         ]
       }
+      site_attendance: {
+        Row: {
+          check_in_latitude: number | null
+          check_in_longitude: number | null
+          check_in_time: string
+          check_out_latitude: number | null
+          check_out_longitude: number | null
+          check_out_time: string | null
+          created_at: string | null
+          date: string
+          guard_id: string
+          id: string
+          notes: string | null
+          site_id: string
+          status: string
+        }
+        Insert: {
+          check_in_latitude?: number | null
+          check_in_longitude?: number | null
+          check_in_time?: string
+          check_out_latitude?: number | null
+          check_out_longitude?: number | null
+          check_out_time?: string | null
+          created_at?: string | null
+          date?: string
+          guard_id: string
+          id?: string
+          notes?: string | null
+          site_id: string
+          status?: string
+        }
+        Update: {
+          check_in_latitude?: number | null
+          check_in_longitude?: number | null
+          check_in_time?: string
+          check_out_latitude?: number | null
+          check_out_longitude?: number | null
+          check_out_time?: string | null
+          created_at?: string | null
+          date?: string
+          guard_id?: string
+          id?: string
+          notes?: string | null
+          site_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_attendance_guard_id_fkey"
+            columns: ["guard_id"]
+            isOneToOne: false
+            referencedRelation: "guards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_attendance_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sites: {
         Row: {
           address: string | null
