@@ -48,8 +48,6 @@ const planSchema = z.object({
   guard_id: z.string().optional(),
   start_date: z.string().min(1, '请选择开始日期'),
   end_date: z.string().min(1, '请选择结束日期'),
-  start_time: z.string().optional(),
-  end_time: z.string().optional(),
   frequency: z.string().optional(),
   notes: z.string().optional(),
   status: z.string().default('active'),
@@ -71,8 +69,6 @@ export default function PatrolPlans() {
       guard_id: '',
       start_date: '',
       end_date: '',
-      start_time: '',
-      end_time: '',
       frequency: '',
       notes: '',
       status: 'active',
@@ -123,8 +119,6 @@ export default function PatrolPlans() {
         guard_id: data.guard_id || null,
         start_date: data.start_date,
         end_date: data.end_date,
-        start_time: data.start_time || null,
-        end_time: data.end_time || null,
         frequency: data.frequency || null,
         notes: data.notes || null,
         status: data.status,
@@ -152,8 +146,6 @@ export default function PatrolPlans() {
           guard_id: data.guard_id || null,
           start_date: data.start_date,
           end_date: data.end_date,
-          start_time: data.start_time || null,
-          end_time: data.end_time || null,
           frequency: data.frequency || null,
           notes: data.notes || null,
           status: data.status,
@@ -203,8 +195,6 @@ export default function PatrolPlans() {
       guard_id: plan.guard_id || '',
       start_date: plan.start_date,
       end_date: plan.end_date,
-      start_time: plan.start_time || '',
-      end_time: plan.end_time || '',
       frequency: plan.frequency || '',
       notes: plan.notes || '',
       status: plan.status,
@@ -374,36 +364,6 @@ export default function PatrolPlans() {
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
-                    name="start_time"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>开始时间</FormLabel>
-                        <FormControl>
-                          <Input type="time" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="end_time"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>结束时间</FormLabel>
-                        <FormControl>
-                          <Input type="time" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
                     name="frequency"
                     render={({ field }) => (
                       <FormItem>
@@ -476,7 +436,7 @@ export default function PatrolPlans() {
               <TableHead>站点</TableHead>
               <TableHead>负责保安</TableHead>
               <TableHead>日期范围</TableHead>
-              <TableHead>时间范围</TableHead>
+              
               <TableHead>巡更间隔</TableHead>
               <TableHead>状态</TableHead>
               <TableHead className="text-right">操作</TableHead>
@@ -485,13 +445,13 @@ export default function PatrolPlans() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8">
+                <TableCell colSpan={7} className="text-center py-8">
                   加载中...
                 </TableCell>
               </TableRow>
             ) : plans.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                   暂无巡更计划
                 </TableCell>
               </TableRow>
@@ -503,11 +463,6 @@ export default function PatrolPlans() {
                   <TableCell>{getGuardName(plan.guard_id)}</TableCell>
                   <TableCell>
                     {plan.start_date} ~ {plan.end_date}
-                  </TableCell>
-                  <TableCell>
-                    {plan.start_time && plan.end_time
-                      ? `${plan.start_time} - ${plan.end_time}`
-                      : '-'}
                   </TableCell>
                   <TableCell>{getFrequencyLabel(plan.frequency)}</TableCell>
                   <TableCell>{getStatusBadge(plan.status || 'active')}</TableCell>
