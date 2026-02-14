@@ -15,6 +15,8 @@ import { Search, Users, UserPlus, Shield, X, Plus, Eye, Trash2, Settings, Clipbo
 import { UserImportDialog } from '@/components/user/UserImportDialog';
 import { GuardRegistrationDialog } from '@/components/user/GuardRegistrationDialog';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/components/auth/AuthProvider';
+import { maskPhone } from '@/lib/data-masking';
 import type { Database } from '@/integrations/supabase/types';
 import {
   AlertDialog,
@@ -77,8 +79,23 @@ export default function UserManagement() {
   const [newUserRole, setNewUserRole] = useState<AppRole>('guard');
   
   const { toast } = useToast();
+  const { user: currentUser } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  const { data: isAdminOrManager } = useQuery({
+    queryKey: ['is-admin-or-manager', currentUser?.id],
+    queryFn: async () => {
+      if (!currentUser?.id) return false;
+      const { data } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', currentUser.id)
+        .in('role', ['admin', 'manager']);
+      return (data?.length || 0) > 0;
+    },
+    enabled: !!currentUser?.id,
+  });
 
   const { data: users, isLoading } = useQuery({
     queryKey: ['users-with-roles'],
@@ -398,7 +415,7 @@ export default function UserManagement() {
                             {user.employee_id || '-'}
                           </TableCell>
                           <TableCell className="font-medium">{user.full_name}</TableCell>
-                          <TableCell>{user.phone || '-'}</TableCell>
+                          <TableCell>{isAdminOrManager ? (user.phone || '-') : maskPhone(user.phone)}</TableCell>
                           <TableCell>
                             <div className="flex gap-1 flex-wrap">
                               {user.roles.length > 0 ? (
