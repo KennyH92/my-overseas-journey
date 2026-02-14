@@ -2,7 +2,7 @@ import {
   Home, Users, MapPin, ClipboardList, 
   FileText, Bell, Calendar, Shield,
   Settings, UserCog, History,
-  BarChart3, CalendarDays, PieChart
+  BarChart3, CalendarDays, PieChart, ScanLine
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import {
@@ -46,7 +46,7 @@ export function AppSidebar() {
   return (
     <Sidebar className={collapsed ? 'w-14' : 'w-60'}>
       <SidebarContent>
-        {/* Dashboard */}
+        {/* Dashboard & Scan */}
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -55,6 +55,14 @@ export function AppSidebar() {
                   <NavLink to="/dashboard" end>
                     <Home className="h-4 w-4" />
                     {!collapsed && <span>仪表板</span>}
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <NavLink to="/scan-checkin">
+                    <ScanLine className="h-4 w-4" />
+                    {!collapsed && <span>扫码签到</span>}
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
