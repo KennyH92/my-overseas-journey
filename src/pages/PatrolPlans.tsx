@@ -245,13 +245,7 @@ export default function PatrolPlans() {
 
   const getFrequencyLabel = (frequency: string | null) => {
     if (!frequency) return '-';
-    const labels: Record<string, string> = {
-      daily: '每天',
-      weekly: '每周',
-      monthly: '每月',
-      once: '一次性',
-    };
-    return labels[frequency] || frequency;
+    return `每 ${frequency} 巡更`;
   };
 
   return (
@@ -413,20 +407,10 @@ export default function PatrolPlans() {
                     name="frequency"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>频率</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="选择频率" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="once">一次性</SelectItem>
-                            <SelectItem value="daily">每天</SelectItem>
-                            <SelectItem value="weekly">每周</SelectItem>
-                            <SelectItem value="monthly">每月</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <FormLabel>巡更间隔时间</FormLabel>
+                        <FormControl>
+                          <Input type="time" placeholder="例: 02:00" {...field} />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -493,7 +477,7 @@ export default function PatrolPlans() {
               <TableHead>负责保安</TableHead>
               <TableHead>日期范围</TableHead>
               <TableHead>时间范围</TableHead>
-              <TableHead>频率</TableHead>
+              <TableHead>巡更间隔</TableHead>
               <TableHead>状态</TableHead>
               <TableHead className="text-right">操作</TableHead>
             </TableRow>
