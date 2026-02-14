@@ -33,14 +33,12 @@ type AppRole = Database['public']['Enums']['app_role'];
 const roleLabels: Record<AppRole, string> = {
   admin: '管理员',
   manager: '经理',
-  supervisor: '主管',
   guard: '保安',
 };
 
 const roleBadgeVariant: Record<AppRole, 'destructive' | 'default' | 'secondary' | 'outline'> = {
   admin: 'destructive',
   manager: 'default',
-  supervisor: 'secondary',
   guard: 'outline',
 };
 
@@ -56,12 +54,6 @@ const roleInfo = {
     description: '可管理站点、保安和巡更计划',
     permissions: ['站点管理', '保安管理', '计划制定', '报告查看', '告警处理'],
     color: 'default' as const,
-  },
-  supervisor: {
-    label: '主管',
-    description: '可监督巡更执行和处理告警',
-    permissions: ['巡更监控', '告警处理', '报告查看', '通知发送'],
-    color: 'secondary' as const,
   },
   guard: {
     label: '保安',
@@ -117,7 +109,7 @@ export default function UserManagement() {
         .select('role');
       if (error) throw error;
       
-      const counts: Record<string, number> = { admin: 0, manager: 0, supervisor: 0, guard: 0 };
+      const counts: Record<string, number> = { admin: 0, manager: 0, guard: 0 };
       data?.forEach(item => {
         if (item.role in counts) {
           counts[item.role]++;
@@ -359,7 +351,6 @@ export default function UserManagement() {
                             <SelectContent>
                               <SelectItem value="admin">管理员</SelectItem>
                               <SelectItem value="manager">经理</SelectItem>
-                              <SelectItem value="supervisor">主管</SelectItem>
                               <SelectItem value="guard">保安</SelectItem>
                             </SelectContent>
                           </Select>
@@ -469,7 +460,6 @@ export default function UserManagement() {
                                         <SelectContent>
                                           <SelectItem value="admin">管理员</SelectItem>
                                           <SelectItem value="manager">经理</SelectItem>
-                                          <SelectItem value="supervisor">主管</SelectItem>
                                           <SelectItem value="guard">保安</SelectItem>
                                         </SelectContent>
                                       </Select>

@@ -25,8 +25,6 @@ const roleMap: Record<string, AppRole> = {
   'admin': 'admin',
   '经理': 'manager',
   'manager': 'manager',
-  '主管': 'supervisor',
-  'supervisor': 'supervisor',
   '保安': 'guard',
   'guard': 'guard',
 };
