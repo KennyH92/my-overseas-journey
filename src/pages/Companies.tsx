@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -7,26 +8,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Pencil, Trash2, Building2, Search } from 'lucide-react';
 import { z } from 'zod';
 
 const companySchema = z.object({
-  name: z.string().min(1, '公司名称不能为空').max(100),
+  name: z.string().min(1).max(100),
   code: z.string().max(50).optional(),
   address: z.string().max(200).optional(),
   contact_person: z.string().max(50).optional(),
@@ -36,15 +28,12 @@ const companySchema = z.object({
 type CompanyFormData = z.infer<typeof companySchema>;
 
 export default function Companies() {
+  const { t } = useTranslation();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCompany, setEditingCompany] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState<CompanyFormData>({
-    name: '',
-    code: '',
-    address: '',
-    contact_person: '',
-    contact_phone: '',
+    name: '', code: '', address: '', contact_person: '', contact_phone: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -54,10 +43,7 @@ export default function Companies() {
   const { data: companies, isLoading } = useQuery({
     queryKey: ['companies'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('companies')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const { data, error } = await supabase.from('companies').select('*').order('created_at', { ascending: false });
       if (error) throw error;
       return data;
     },
@@ -70,11 +56,11 @@ export default function Companies() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['companies'] });
-      toast({ title: '创建成功', description: '公司已成功创建' });
+      toast({ title: t('common.createSuccess') });
       resetForm();
     },
     onError: (error: any) => {
-      toast({ title: '创建失败', description: error.message, variant: 'destructive' });
+      toast({ title: t('common.createFailed'), description: error.message, variant: 'destructive' });
     },
   });
 
@@ -85,11 +71,11 @@ export default function Companies() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['companies'] });
-      toast({ title: '更新成功', description: '公司信息已更新' });
+      toast({ title: t('common.updateSuccess') });
       resetForm();
     },
     onError: (error: any) => {
-      toast({ title: '更新失败', description: error.message, variant: 'destructive' });
+      toast({ title: t('common.updateFailed'), description: error.message, variant: 'destructive' });
     },
   });
 
@@ -100,21 +86,15 @@ export default function Companies() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['companies'] });
-      toast({ title: '删除成功', description: '公司已删除' });
+      toast({ title: t('common.deleteSuccess') });
     },
     onError: (error: any) => {
-      toast({ title: '删除失败', description: error.message, variant: 'destructive' });
+      toast({ title: t('common.deleteFailed'), description: error.message, variant: 'destructive' });
     },
   });
 
   const resetForm = () => {
-    setFormData({
-      name: '',
-      code: '',
-      address: '',
-      contact_person: '',
-      contact_phone: '',
-    });
+    setFormData({ name: '', code: '', address: '', contact_person: '', contact_phone: '' });
     setErrors({});
     setEditingCompany(null);
     setIsDialogOpen(false);
@@ -123,11 +103,8 @@ export default function Companies() {
   const handleEdit = (company: any) => {
     setEditingCompany(company);
     setFormData({
-      name: company.name,
-      code: company.code || '',
-      address: company.address || '',
-      contact_person: company.contact_person || '',
-      contact_phone: company.contact_phone || '',
+      name: company.name, code: company.code || '', address: company.address || '',
+      contact_person: company.contact_person || '', contact_phone: company.contact_phone || '',
     });
     setIsDialogOpen(true);
   };
@@ -143,15 +120,7 @@ export default function Companies() {
       setErrors(fieldErrors);
       return;
     }
-
-    const submitData = {
-      ...formData,
-      code: formData.code || null,
-      address: formData.address || null,
-      contact_person: formData.contact_person || null,
-      contact_phone: formData.contact_phone || null,
-    };
-
+    const submitData = { ...formData, code: formData.code || null, address: formData.address || null, contact_person: formData.contact_person || null, contact_phone: formData.contact_phone || null };
     if (editingCompany) {
       updateMutation.mutate({ id: editingCompany.id, data: submitData });
     } else {
@@ -172,75 +141,47 @@ export default function Companies() {
           <div className="flex items-center gap-3">
             <Building2 className="h-8 w-8 text-primary" />
             <div>
-              <h1 className="text-2xl font-bold text-foreground">公司管理</h1>
-              <p className="text-muted-foreground">管理系统中的公司信息</p>
+              <h1 className="text-2xl font-bold text-foreground">{t('companies.title')}</h1>
+              <p className="text-muted-foreground">{t('companies.description')}</p>
             </div>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setIsDialogOpen(true); }}>
             <DialogTrigger asChild>
               <Button onClick={() => setIsDialogOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
-                添加公司
+                {t('companies.addCompany')}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-md">
               <DialogHeader>
-                <DialogTitle>{editingCompany ? '编辑公司' : '添加公司'}</DialogTitle>
+                <DialogTitle>{editingCompany ? t('companies.editCompany') : t('companies.addCompany')}</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">公司名称 *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="请输入公司名称"
-                  />
+                  <Label htmlFor="name">{t('companies.companyName')} *</Label>
+                  <Input id="name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder={t('companies.enterCompanyName')} />
                   {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="code">公司编号</Label>
-                  <Input
-                    id="code"
-                    value={formData.code}
-                    onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                    placeholder="请输入公司编号"
-                  />
+                  <Label htmlFor="code">{t('companies.companyCode')}</Label>
+                  <Input id="code" value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} placeholder={t('companies.enterCompanyCode')} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="address">地址</Label>
-                  <Textarea
-                    id="address"
-                    value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    placeholder="请输入公司地址"
-                    rows={2}
-                  />
+                  <Label htmlFor="address">{t('common.address')}</Label>
+                  <Textarea id="address" value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} placeholder={t('companies.enterAddress')} rows={2} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="contact_person">联系人</Label>
-                  <Input
-                    id="contact_person"
-                    value={formData.contact_person}
-                    onChange={(e) => setFormData({ ...formData, contact_person: e.target.value })}
-                    placeholder="请输入联系人姓名"
-                  />
+                  <Label htmlFor="contact_person">{t('common.contactPerson')}</Label>
+                  <Input id="contact_person" value={formData.contact_person} onChange={(e) => setFormData({ ...formData, contact_person: e.target.value })} placeholder={t('companies.enterContactPerson')} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="contact_phone">联系电话</Label>
-                  <Input
-                    id="contact_phone"
-                    value={formData.contact_phone}
-                    onChange={(e) => setFormData({ ...formData, contact_phone: e.target.value })}
-                    placeholder="请输入联系电话"
-                  />
+                  <Label htmlFor="contact_phone">{t('common.contactPhone')}</Label>
+                  <Input id="contact_phone" value={formData.contact_phone} onChange={(e) => setFormData({ ...formData, contact_phone: e.target.value })} placeholder={t('companies.enterContactPhone')} />
                 </div>
                 <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={resetForm}>
-                    取消
-                  </Button>
+                  <Button type="button" variant="outline" onClick={resetForm}>{t('common.cancel')}</Button>
                   <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
-                    {editingCompany ? '更新' : '创建'}
+                    {editingCompany ? t('common.update') : t('common.create')}
                   </Button>
                 </div>
               </form>
@@ -251,12 +192,7 @@ export default function Companies() {
         <div className="flex items-center gap-4">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="搜索公司名称、编号或联系人..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
+            <Input placeholder={t('companies.searchPlaceholder')} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
           </div>
         </div>
 
@@ -264,27 +200,19 @@ export default function Companies() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>公司名称</TableHead>
-                <TableHead>公司编号</TableHead>
-                <TableHead>联系人</TableHead>
-                <TableHead>联系电话</TableHead>
-                <TableHead>地址</TableHead>
-                <TableHead className="w-[100px]">操作</TableHead>
+                <TableHead>{t('companies.companyName')}</TableHead>
+                <TableHead>{t('companies.companyCode')}</TableHead>
+                <TableHead>{t('common.contactPerson')}</TableHead>
+                <TableHead>{t('common.contactPhone')}</TableHead>
+                <TableHead>{t('common.address')}</TableHead>
+                <TableHead className="w-[100px]">{t('common.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8">
-                    加载中...
-                  </TableCell>
-                </TableRow>
+                <TableRow><TableCell colSpan={6} className="text-center py-8">{t('common.loading')}</TableCell></TableRow>
               ) : filteredCompanies?.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                    暂无公司数据
-                  </TableCell>
-                </TableRow>
+                <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">{t('companies.noCompanies')}</TableCell></TableRow>
               ) : (
                 filteredCompanies?.map((company) => (
                   <TableRow key={company.id}>
@@ -295,15 +223,8 @@ export default function Companies() {
                     <TableCell className="max-w-[200px] truncate">{company.address || '-'}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => handleEdit(company)}>
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => deleteMutation.mutate(company.id)}
-                          disabled={deleteMutation.isPending}
-                        >
+                        <Button variant="ghost" size="icon" onClick={() => handleEdit(company)}><Pencil className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(company.id)} disabled={deleteMutation.isPending}>
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                       </div>

@@ -371,6 +371,12 @@
     "lateClose": "补签退",
     "unknownSite": "未知站点"
   },
+  "missingCheckout": {
+    "title": "上个班次未结束",
+    "description": "系统检测到您在 {{siteName}} 尚未签退。请确认上个班次的下班时间。",
+    "fixTime": "补签退时间",
+    "confirmBtn": "确认补签并开始今日工作"
+  },
   "sos": {
     "button": "紧急求救",
     "title": "紧急求救"

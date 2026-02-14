@@ -371,6 +371,12 @@
     "lateClose": "Late Close",
     "unknownSite": "Unknown site"
   },
+  "missingCheckout": {
+    "title": "Previous Shift Not Ended",
+    "description": "System detected you have not checked out from {{siteName}}. Please confirm check-out time for your previous shift.",
+    "fixTime": "Supplementary Check-out Time",
+    "confirmBtn": "Confirm and Start Today's Work"
+  },
   "sos": {
     "button": "SOS",
     "title": "Emergency SOS"

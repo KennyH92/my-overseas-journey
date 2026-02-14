@@ -371,6 +371,12 @@
     "lateClose": "Tutup Lewat",
     "unknownSite": "Tapak tidak diketahui"
   },
+  "missingCheckout": {
+    "title": "Syif Sebelumnya Belum Tamat",
+    "description": "Sistem mengesan anda belum daftar keluar dari {{siteName}}. Sila sahkan masa daftar keluar.",
+    "fixTime": "Masa Daftar Keluar Tambahan",
+    "confirmBtn": "Sahkan dan Mula Kerja Hari Ini"
+  },
   "sos": {
     "button": "SOS / Kecemasan",
     "title": "SOS Kecemasan"
