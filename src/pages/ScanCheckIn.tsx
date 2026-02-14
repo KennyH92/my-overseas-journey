@@ -7,9 +7,9 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Camera, CheckCircle2, LogIn, LogOut, MapPin, Clock, XCircle, ScanLine } from 'lucide-react';
+import { Camera, CheckCircle2, LogIn, LogOut, MapPin, Clock, XCircle, ScanLine, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import MissingCheckoutDialog from '@/components/scan/MissingCheckoutDialog';
 
 interface QRData {
   type: string;
@@ -24,6 +24,13 @@ type ScanResult = {
   time: string;
 } | null;
 
+interface UnresolvedRecord {
+  id: string;
+  site_name: string;
+  pending_site_id: string;
+  pending_site_name: string;
+}
+
 export default function ScanCheckIn() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -33,6 +40,7 @@ export default function ScanCheckIn() {
   const [error, setError] = useState<string | null>(null);
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const processingRef = useRef(false);
+  const [unresolvedRecord, setUnresolvedRecord] = useState<UnresolvedRecord | null>(null);
 
   // Get current user's guard record
   const { data: guard } = useQuery({
@@ -69,49 +77,102 @@ export default function ScanCheckIn() {
     enabled: !!guard?.id,
   });
 
-  const checkInMutation = useMutation({
-    mutationFn: async ({ siteId }: { siteId: string }) => {
+  // Resolve missing checkout then optionally check in at new site
+  const resolveMutation = useMutation({
+    mutationFn: async ({ oldRecordId, fixOutTime, newSiteId }: { oldRecordId: string; fixOutTime: string; newSiteId?: string }) => {
       if (!guard?.id) throw new Error('未找到保安记录');
 
-      // Check if already checked in today at this site
-      const existing = todayRecords.find(
-        (r: any) => r.site_id === siteId && r.status === 'checked_in'
-      );
+      // Close the old record as late_close
+      const { error: updateErr } = await supabase
+        .from('site_attendance')
+        .update({
+          check_out_time: fixOutTime,
+          status: 'late_close',
+        })
+        .eq('id', oldRecordId);
+      if (updateErr) throw updateErr;
 
-      if (existing) {
-        // Check out
-        const { error } = await supabase
-          .from('site_attendance')
-          .update({
-            check_out_time: new Date().toISOString(),
-            status: 'checked_out',
-          })
-          .eq('id', existing.id);
-        if (error) throw error;
-        return { action: 'check_out' as const };
-      } else {
-        // Check in
-        const { error } = await supabase
+      // If new site provided, create new check-in
+      if (newSiteId) {
+        const { error: insertErr } = await supabase
           .from('site_attendance')
           .insert({
             guard_id: guard.id,
-            site_id: siteId,
+            site_id: newSiteId,
             date: today,
             check_in_time: new Date().toISOString(),
             status: 'checked_in',
           });
-        if (error) {
-          if (error.code === '23505') {
-            throw new Error('今日已在该站点签到并签退，无法重复签到');
-          }
-          throw error;
-        }
-        return { action: 'check_in' as const };
+        if (insertErr) throw insertErr;
+        return { action: 'resolved_and_checked_in' as const };
       }
+      return { action: 'resolved' as const };
     },
-    onSuccess: (result) => {
+    onSuccess: () => {
       refetchRecords();
       queryClient.invalidateQueries({ queryKey: ['site-attendance-today'] });
+    },
+  });
+
+  const checkInMutation = useMutation({
+    mutationFn: async ({ siteId, siteName }: { siteId: string; siteName: string }) => {
+      if (!guard?.id) throw new Error('未找到保安记录');
+
+      // Check for ANY unresolved checked_in records (not just today, not just this site)
+      const { data: unresolvedRecords, error: checkErr } = await supabase
+        .from('site_attendance')
+        .select('id, site_id, sites(name)')
+        .eq('guard_id', guard.id)
+        .eq('status', 'checked_in');
+      if (checkErr) throw checkErr;
+
+      if (unresolvedRecords && unresolvedRecords.length > 0) {
+        const oldRecord = unresolvedRecords[0] as any;
+        // If it's the same site today, do check-out
+        const isSameSiteToday = oldRecord.site_id === siteId && todayRecords.some(
+          (r: any) => r.site_id === siteId && r.status === 'checked_in'
+        );
+
+        if (isSameSiteToday) {
+          // Normal check out
+          const { error } = await supabase
+            .from('site_attendance')
+            .update({
+              check_out_time: new Date().toISOString(),
+              status: 'checked_out',
+            })
+            .eq('id', oldRecord.id);
+          if (error) throw error;
+          return { action: 'check_out' as const };
+        }
+
+        // Different site or different day — conflict! Return info for dialog
+        throw {
+          isConflict: true,
+          recordId: oldRecord.id,
+          siteName: oldRecord.sites?.name || '未知站点',
+          pendingSiteId: siteId,
+          pendingSiteName: siteName,
+        };
+      }
+
+      // No unresolved records — normal check in
+      const { error } = await supabase
+        .from('site_attendance')
+        .insert({
+          guard_id: guard.id,
+          site_id: siteId,
+          date: today,
+          check_in_time: new Date().toISOString(),
+          status: 'checked_in',
+        });
+      if (error) {
+        if (error.code === '23505') {
+          throw new Error('今日已在该站点签到并签退，无法重复签到');
+        }
+        throw error;
+      }
+      return { action: 'check_in' as const };
     },
   });
 
@@ -134,7 +195,7 @@ export default function ScanCheckIn() {
       }
       setScanning(false);
 
-      const result = await checkInMutation.mutateAsync({ siteId: qrData.site_id });
+      const result = await checkInMutation.mutateAsync({ siteId: qrData.site_id, siteName: qrData.site_name });
 
       setScanResult({
         status: result.action,
@@ -146,17 +207,62 @@ export default function ScanCheckIn() {
         title: result.action === 'check_in' ? '签到成功' : '签退成功',
         description: `${qrData.site_name} - ${format(new Date(), 'HH:mm:ss')}`,
       });
+
+      refetchRecords();
+      queryClient.invalidateQueries({ queryKey: ['site-attendance-today'] });
     } catch (err: any) {
-      setError(err.message || '扫码处理失败');
-      toast({
-        title: '操作失败',
-        description: err.message,
-        variant: 'destructive',
-      });
+      if (err.isConflict) {
+        // Show the missing checkout dialog
+        setUnresolvedRecord({
+          id: err.recordId,
+          site_name: err.siteName,
+          pending_site_id: err.pendingSiteId,
+          pending_site_name: err.pendingSiteName,
+        });
+      } else {
+        setError(err.message || '扫码处理失败');
+        toast({
+          title: '操作失败',
+          description: err.message,
+          variant: 'destructive',
+        });
+      }
     } finally {
       processingRef.current = false;
     }
-  }, [checkInMutation, toast]);
+  }, [checkInMutation, toast, refetchRecords, queryClient]);
+
+  const handleResolveConfirm = async (recordId: string, fixOutTime: string) => {
+    try {
+      const result = await resolveMutation.mutateAsync({
+        oldRecordId: recordId,
+        fixOutTime,
+        newSiteId: unresolvedRecord?.pending_site_id,
+      });
+
+      setUnresolvedRecord(null);
+
+      if (result.action === 'resolved_and_checked_in') {
+        setScanResult({
+          status: 'check_in',
+          site_name: unresolvedRecord?.pending_site_name || '',
+          time: format(new Date(), 'HH:mm:ss'),
+        });
+        toast({
+          title: '补签成功，已签到新站点',
+          description: `${unresolvedRecord?.pending_site_name} - ${format(new Date(), 'HH:mm:ss')}`,
+        });
+      } else {
+        toast({ title: '补签退成功' });
+      }
+    } catch (err: any) {
+      toast({
+        title: '补签失败',
+        description: err.message,
+        variant: 'destructive',
+      });
+    }
+  };
 
   const startScanner = async () => {
     setError(null);
@@ -171,7 +277,7 @@ export default function ScanCheckIn() {
         { facingMode: 'environment' },
         { fps: 10, qrbox: { width: 250, height: 250 } },
         handleScanSuccess,
-        () => {} // ignore scan failures
+        () => {}
       );
     } catch (err: any) {
       setError('无法启动摄像头，请检查权限设置');
@@ -193,6 +299,22 @@ export default function ScanCheckIn() {
       }
     };
   }, []);
+
+  // Helper to get status badge
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'checked_in':
+        return <Badge variant="outline" className="text-xs">在岗中</Badge>;
+      case 'checked_out':
+        return null; // shown via time
+      case 'system_auto_closed':
+        return <Badge variant="destructive" className="text-xs gap-1"><AlertTriangle className="w-3 h-3" />系统截断</Badge>;
+      case 'late_close':
+        return <Badge variant="destructive" className="text-xs gap-1"><AlertTriangle className="w-3 h-3" />补签退</Badge>;
+      default:
+        return null;
+    }
+  };
 
   if (!guard) {
     return (
@@ -218,6 +340,15 @@ export default function ScanCheckIn() {
         <h1 className="text-3xl font-bold text-foreground">扫码签到</h1>
         <p className="text-muted-foreground mt-1">扫描站点二维码进行考勤打卡</p>
       </div>
+
+      {/* Missing Checkout Dialog */}
+      <MissingCheckoutDialog
+        open={!!unresolvedRecord}
+        siteName={unresolvedRecord?.site_name || ''}
+        recordId={unresolvedRecord?.id || ''}
+        onConfirm={handleResolveConfirm}
+        onCancel={() => setUnresolvedRecord(null)}
+      />
 
       {/* Scanner Area */}
       <Card>
@@ -295,42 +426,44 @@ export default function ScanCheckIn() {
             <p className="text-center text-muted-foreground py-6">今日暂无签到记录</p>
           ) : (
             <div className="space-y-3">
-              {todayRecords.map((record: any) => (
-                <div
-                  key={record.id}
-                  className="flex items-center justify-between p-3 rounded-lg border bg-card"
-                >
-                  <div className="flex items-center gap-3">
-                    <MapPin className="w-5 h-5 text-primary" />
-                    <div>
-                      <p className="font-medium">{record.sites?.name || '未知站点'}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {record.sites?.address || ''}
-                      </p>
+              {todayRecords.map((record: any) => {
+                const isAbnormal = record.status === 'system_auto_closed' || record.status === 'late_close';
+                return (
+                  <div
+                    key={record.id}
+                    className={`flex items-center justify-between p-3 rounded-lg border ${
+                      isAbnormal ? 'border-destructive/50 bg-destructive/5' : 'bg-card'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <MapPin className={`w-5 h-5 ${isAbnormal ? 'text-destructive' : 'text-primary'}`} />
+                      <div>
+                        <p className="font-medium">{record.sites?.name || '未知站点'}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {record.sites?.address || ''}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="flex items-center gap-2">
-                      <LogIn className="w-4 h-4 text-green-500" />
-                      <span className="text-sm">
-                        {format(new Date(record.check_in_time), 'HH:mm')}
-                      </span>
-                    </div>
-                    {record.check_out_time ? (
+                    <div className="text-right space-y-1">
                       <div className="flex items-center gap-2">
-                        <LogOut className="w-4 h-4 text-blue-500" />
+                        <LogIn className="w-4 h-4 text-green-500" />
                         <span className="text-sm">
-                          {format(new Date(record.check_out_time), 'HH:mm')}
+                          {format(new Date(record.check_in_time), 'HH:mm')}
                         </span>
                       </div>
-                    ) : (
-                      <Badge variant="outline" className="text-xs">
-                        在岗中
-                      </Badge>
-                    )}
+                      {record.check_out_time ? (
+                        <div className="flex items-center gap-2">
+                          <LogOut className="w-4 h-4 text-blue-500" />
+                          <span className="text-sm">
+                            {format(new Date(record.check_out_time), 'HH:mm')}
+                          </span>
+                        </div>
+                      ) : null}
+                      {getStatusBadge(record.status)}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </CardContent>

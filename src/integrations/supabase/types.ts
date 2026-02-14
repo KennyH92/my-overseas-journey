@@ -702,6 +702,7 @@ export type Database = {
       }
       site_attendance: {
         Row: {
+          auto_closed_at: string | null
           check_in_latitude: number | null
           check_in_longitude: number | null
           check_in_time: string
@@ -717,6 +718,7 @@ export type Database = {
           status: string
         }
         Insert: {
+          auto_closed_at?: string | null
           check_in_latitude?: number | null
           check_in_longitude?: number | null
           check_in_time?: string
@@ -732,6 +734,7 @@ export type Database = {
           status?: string
         }
         Update: {
+          auto_closed_at?: string | null
           check_in_latitude?: number | null
           check_in_longitude?: number | null
           check_in_time?: string
