@@ -12,7 +12,7 @@ import Install from "./pages/Install";
 import ChangePassword from "./pages/ChangePassword";
 import Dashboard from "./pages/Dashboard";
 import Sites from "./pages/Sites";
-import Checkpoints from "./pages/Checkpoints";
+// Checkpoints is now integrated into Sites page
 import Guards from "./pages/Guards";
 import Projects from "./pages/Projects";
 import Notices from "./pages/Notices";
@@ -107,14 +107,8 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="/checkpoints"
-              element={
-                <ProtectedRoute>
-                  <Checkpoints />
-                </ProtectedRoute>
-              }
-            />
+            {/* /checkpoints now redirects to /sites */}
+            <Route path="/checkpoints" element={<Navigate to="/sites" replace />} />
             <Route
               path="/guards"
               element={
