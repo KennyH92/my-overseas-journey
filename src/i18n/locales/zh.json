@@ -1,0 +1,95 @@
+{
+  "common": {
+    "login": "登录",
+    "logout": "退出登录",
+    "trial": "试用",
+    "language": "语言",
+    "save": "保存",
+    "cancel": "取消",
+    "confirm": "确认",
+    "delete": "删除",
+    "edit": "编辑",
+    "search": "搜索",
+    "loading": "加载中...",
+    "noData": "暂无数据",
+    "back": "返回",
+    "export": "导出",
+    "import": "导入",
+    "add": "添加",
+    "status": "状态",
+    "actions": "操作",
+    "name": "名称",
+    "phone": "手机号",
+    "email": "邮箱",
+    "date": "日期",
+    "time": "时间",
+    "notes": "备注",
+    "notSet": "未设置"
+  },
+  "login": {
+    "title": "国管巡更系统-港不",
+    "staffIdLogin": "工号登录",
+    "emailLogin": "邮箱登录",
+    "staffIdPlaceholder": "工号 (例如: TSSB00001)",
+    "emailPlaceholder": "邮箱地址",
+    "passwordPlaceholder": "密码",
+    "rememberPassword": "记住密码",
+    "forgotPassword": "忘记密码？",
+    "loggingIn": "登录中...",
+    "trialUnavailable": "试用模式暂不可用",
+    "contactAdmin": "请联系管理员获取访问权限"
+  },
+  "nav": {
+    "dashboard": "仪表板",
+    "scanCheckIn": "扫码签到",
+    "setup": "初始设置",
+    "companies": "公司设置",
+    "projects": "顾客/项目",
+    "sites": "站点管理",
+    "patrolPlan": "巡更计划",
+    "notices": "消息中心",
+    "operations": "巡更操作",
+    "patrolReport": "巡更报告",
+    "patrolHistory": "巡更历史",
+    "patrolCharts": "巡更统计",
+    "patrolCalendar": "巡更日历",
+    "dataManagement": "资料设置",
+    "attendanceReport": "考勤统计",
+    "systemManagement": "系统管理",
+    "userManagement": "用户与权限"
+  },
+  "header": {
+    "patrol": "巡更系统"
+  },
+  "dashboard": {
+    "title": "仪表板"
+  },
+  "patrol": {
+    "patrol": "巡更",
+    "checkpoint": "巡更点",
+    "site": "站点",
+    "guard": "保安",
+    "plan": "计划",
+    "report": "报告"
+  },
+  "attendance": {
+    "attendance": "考勤",
+    "checkIn": "签到",
+    "checkOut": "签退"
+  },
+  "scan": {
+    "scanError": "无效二维码",
+    "scanSuccess": "扫码成功"
+  },
+  "sos": {
+    "button": "紧急求救",
+    "title": "紧急求救"
+  },
+  "errors": {
+    "ERR_QR_EXPIRED": "二维码已过期",
+    "ERR_QR_INVALID": "无效二维码",
+    "ERR_USER_NOT_FOUND": "用户未找到",
+    "ERR_UNAUTHORIZED": "无权限访问",
+    "ERR_SERVER": "服务器错误，请重试"
+  }
+}

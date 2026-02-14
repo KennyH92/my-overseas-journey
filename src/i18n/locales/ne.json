@@ -1,0 +1,95 @@
+{
+  "common": {
+    "login": "लग-इन",
+    "logout": "लग-आउट",
+    "trial": "परीक्षण",
+    "language": "भाषा",
+    "save": "सुरक्षित गर्नुहोस्",
+    "cancel": "रद्द गर्नुहोस्",
+    "confirm": "पुष्टि गर्नुहोस्",
+    "delete": "मेटाउनुहोस्",
+    "edit": "सम्पादन",
+    "search": "खोज्नुहोस्",
+    "loading": "लोड हुँदैछ...",
+    "noData": "कुनै डाटा छैन",
+    "back": "पछाडि",
+    "export": "निर्यात",
+    "import": "आयात",
+    "add": "थप्नुहोस्",
+    "status": "स्थिति",
+    "actions": "कार्यहरू",
+    "name": "नाम",
+    "phone": "फोन",
+    "email": "इमेल",
+    "date": "मिति",
+    "time": "समय",
+    "notes": "नोटहरू",
+    "notSet": "सेट गरिएको छैन"
+  },
+  "login": {
+    "title": "गार्ड गस्ती प्रणाली",
+    "staffIdLogin": "कर्मचारी ID लग-इन",
+    "emailLogin": "इमेल लग-इन",
+    "staffIdPlaceholder": "कर्मचारी ID (उदा: TSSB00001)",
+    "emailPlaceholder": "इमेल ठेगाना",
+    "passwordPlaceholder": "पासवर्ड",
+    "rememberPassword": "पासवर्ड सम्झनुहोस्",
+    "forgotPassword": "पासवर्ड बिर्सनुभयो?",
+    "loggingIn": "लग-इन हुँदैछ...",
+    "trialUnavailable": "परीक्षण मोड उपलब्ध छैन",
+    "contactAdmin": "पहुँचको लागि कृपया प्रशासकलाई सम्पर्क गर्नुहोस्"
+  },
+  "nav": {
+    "dashboard": "ड्यासबोर्ड",
+    "scanCheckIn": "स्क्यान चेक-इन",
+    "setup": "सेटअप",
+    "companies": "कम्पनीहरू",
+    "projects": "ग्राहक/परियोजना",
+    "sites": "साइट व्यवस्थापन",
+    "patrolPlan": "गस्ती योजना",
+    "notices": "सूचनाहरू",
+    "operations": "गस्ती सञ्चालन",
+    "patrolReport": "गस्ती रिपोर्ट",
+    "patrolHistory": "गस्ती इतिहास",
+    "patrolCharts": "गस्ती तथ्याङ्क",
+    "patrolCalendar": "गस्ती क्यालेन्डर",
+    "dataManagement": "डाटा व्यवस्थापन",
+    "attendanceReport": "हाजिरी रिपोर्ट",
+    "systemManagement": "प्रणाली व्यवस्थापन",
+    "userManagement": "प्रयोगकर्ता र भूमिका"
+  },
+  "header": {
+    "patrol": "गस्ती"
+  },
+  "dashboard": {
+    "title": "ड्यासबोर्ड"
+  },
+  "patrol": {
+    "patrol": "गस्ती",
+    "checkpoint": "चेकपोइन्ट",
+    "site": "साइट",
+    "guard": "गार्ड",
+    "plan": "योजना",
+    "report": "रिपोर्ट"
+  },
+  "attendance": {
+    "attendance": "हाजिरी",
+    "checkIn": "चेक-इन",
+    "checkOut": "चेक-आउट"
+  },
+  "scan": {
+    "scanError": "अमान्य QR कोड",
+    "scanSuccess": "स्क्यान सफल"
+  },
+  "sos": {
+    "button": "आपतकालीन",
+    "title": "आपतकालीन SOS"
+  },
+  "errors": {
+    "ERR_QR_EXPIRED": "QR कोडको म्याद सकियो",
+    "ERR_QR_INVALID": "अमान्य QR कोड",
+    "ERR_USER_NOT_FOUND": "प्रयोगकर्ता फेला परेन",
+    "ERR_UNAUTHORIZED": "अनधिकृत पहुँच",
+    "ERR_SERVER": "सर्भर त्रुटि, कृपया पुन: प्रयास गर्नुहोस्"
+  }
+}

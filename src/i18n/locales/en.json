@@ -1,0 +1,95 @@
+{
+  "common": {
+    "login": "Login",
+    "logout": "Logout",
+    "trial": "Trial",
+    "language": "Language",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "loading": "Loading...",
+    "noData": "No data",
+    "back": "Back",
+    "export": "Export",
+    "import": "Import",
+    "add": "Add",
+    "status": "Status",
+    "actions": "Actions",
+    "name": "Name",
+    "phone": "Phone",
+    "email": "Email",
+    "date": "Date",
+    "time": "Time",
+    "notes": "Notes",
+    "notSet": "Not set"
+  },
+  "login": {
+    "title": "Guard Patrol System",
+    "staffIdLogin": "Staff ID Login",
+    "emailLogin": "Email Login",
+    "staffIdPlaceholder": "Staff ID (e.g. TSSB00001)",
+    "emailPlaceholder": "Email address",
+    "passwordPlaceholder": "Password",
+    "rememberPassword": "Remember Password",
+    "forgotPassword": "Forgot Password?",
+    "loggingIn": "Logging in...",
+    "trialUnavailable": "Trial mode is currently unavailable",
+    "contactAdmin": "Please contact your administrator for access"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "scanCheckIn": "Scan Check-in",
+    "setup": "Setup",
+    "companies": "Companies",
+    "projects": "Customers/Projects",
+    "sites": "Site Management",
+    "patrolPlan": "Patrol Plans",
+    "notices": "Notices",
+    "operations": "Patrol Operations",
+    "patrolReport": "Patrol Reports",
+    "patrolHistory": "Patrol History",
+    "patrolCharts": "Patrol Statistics",
+    "patrolCalendar": "Patrol Calendar",
+    "dataManagement": "Data Management",
+    "attendanceReport": "Attendance Report",
+    "systemManagement": "System Management",
+    "userManagement": "Users & Roles"
+  },
+  "header": {
+    "patrol": "PATROL"
+  },
+  "dashboard": {
+    "title": "Dashboard"
+  },
+  "patrol": {
+    "patrol": "Patrol",
+    "checkpoint": "Checkpoint",
+    "site": "Site",
+    "guard": "Guard",
+    "plan": "Plan",
+    "report": "Report"
+  },
+  "attendance": {
+    "attendance": "Attendance",
+    "checkIn": "Check In",
+    "checkOut": "Check Out"
+  },
+  "scan": {
+    "scanError": "Invalid QR Code",
+    "scanSuccess": "Scan successful"
+  },
+  "sos": {
+    "button": "SOS",
+    "title": "Emergency SOS"
+  },
+  "errors": {
+    "ERR_QR_EXPIRED": "QR code expired",
+    "ERR_QR_INVALID": "Invalid QR code",
+    "ERR_USER_NOT_FOUND": "User not found",
+    "ERR_UNAUTHORIZED": "Unauthorized access",
+    "ERR_SERVER": "Server error, please try again"
+  }
+}
