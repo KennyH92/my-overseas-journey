@@ -1,0 +1,95 @@
+{
+  "common": {
+    "login": "Log Masuk",
+    "logout": "Log Keluar",
+    "trial": "Percubaan",
+    "language": "Bahasa",
+    "save": "Simpan",
+    "cancel": "Batal",
+    "confirm": "Sahkan",
+    "delete": "Padam",
+    "edit": "Sunting",
+    "search": "Cari",
+    "loading": "Memuatkan...",
+    "noData": "Tiada data",
+    "back": "Kembali",
+    "export": "Eksport",
+    "import": "Import",
+    "add": "Tambah",
+    "status": "Status",
+    "actions": "Tindakan",
+    "name": "Nama",
+    "phone": "Telefon",
+    "email": "E-mel",
+    "date": "Tarikh",
+    "time": "Masa",
+    "notes": "Nota",
+    "notSet": "Tidak ditetapkan"
+  },
+  "login": {
+    "title": "Sistem Rondaan Pengawal",
+    "staffIdLogin": "Log Masuk ID Kakitangan",
+    "emailLogin": "Log Masuk E-mel",
+    "staffIdPlaceholder": "ID Kakitangan (cth: TSSB00001)",
+    "emailPlaceholder": "Alamat e-mel",
+    "passwordPlaceholder": "Kata Laluan",
+    "rememberPassword": "Ingat Kata Laluan",
+    "forgotPassword": "Lupa Kata Laluan?",
+    "loggingIn": "Sedang log masuk...",
+    "trialUnavailable": "Mod percubaan tidak tersedia",
+    "contactAdmin": "Sila hubungi pentadbir anda untuk akses"
+  },
+  "nav": {
+    "dashboard": "Papan Pemuka",
+    "scanCheckIn": "Imbas Daftar Masuk",
+    "setup": "Tetapan",
+    "companies": "Syarikat",
+    "projects": "Pelanggan/Projek",
+    "sites": "Pengurusan Tapak",
+    "patrolPlan": "Pelan Rondaan",
+    "notices": "Notis",
+    "operations": "Operasi Rondaan",
+    "patrolReport": "Laporan Rondaan",
+    "patrolHistory": "Sejarah Rondaan",
+    "patrolCharts": "Statistik Rondaan",
+    "patrolCalendar": "Kalendar Rondaan",
+    "dataManagement": "Pengurusan Data",
+    "attendanceReport": "Laporan Kehadiran",
+    "systemManagement": "Pengurusan Sistem",
+    "userManagement": "Pengguna & Peranan"
+  },
+  "header": {
+    "patrol": "RONDAAN"
+  },
+  "dashboard": {
+    "title": "Papan Pemuka"
+  },
+  "patrol": {
+    "patrol": "Rondaan",
+    "checkpoint": "Pusat Pemeriksaan",
+    "site": "Tapak",
+    "guard": "Pengawal",
+    "plan": "Pelan",
+    "report": "Laporan"
+  },
+  "attendance": {
+    "attendance": "Kehadiran",
+    "checkIn": "Daftar Masuk",
+    "checkOut": "Daftar Keluar"
+  },
+  "scan": {
+    "scanError": "Kod QR Tidak Sah",
+    "scanSuccess": "Imbasan berjaya"
+  },
+  "sos": {
+    "button": "SOS / Kecemasan",
+    "title": "SOS Kecemasan"
+  },
+  "errors": {
+    "ERR_QR_EXPIRED": "Kod QR telah tamat tempoh",
+    "ERR_QR_INVALID": "Kod QR tidak sah",
+    "ERR_USER_NOT_FOUND": "Pengguna tidak dijumpai",
+    "ERR_UNAUTHORIZED": "Akses tidak dibenarkan",
+    "ERR_SERVER": "Ralat pelayan, sila cuba lagi"
+  }
+}

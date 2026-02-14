@@ -1,35 +1,36 @@
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
 import { useAuth } from '@/components/auth/AuthProvider';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Cloud, LogOut, User } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+
 interface AppLayoutProps {
   children: React.ReactNode;
 }
-export function AppLayout({
-  children
-}: AppLayoutProps) {
-  const {
-    user,
-    signOut
-  } = useAuth();
-  return <SidebarProvider>
+export function AppLayout({ children }: AppLayoutProps) {
+  const { user, signOut } = useAuth();
+  const { t } = useTranslation();
+
+  return (
+    <SidebarProvider>
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         
         <div className="flex-1 flex flex-col">
-          {/* Header */}
           <header className="h-14 border-b bg-card flex items-center justify-between px-4 sticky top-0 z-10">
             <div className="flex items-center gap-3">
               <SidebarTrigger className="text-foreground" />
               <div className="flex items-center gap-2">
                 <Cloud className="w-6 h-6 text-primary" />
-                <h1 className="text-lg font-semibold text-foreground">PATROL</h1>
+                <h1 className="text-lg font-semibold text-foreground">{t('header.patrol')}</h1>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <LanguageSwitcher />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon">
@@ -43,18 +44,18 @@ export function AppLayout({
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={signOut}>
                     <LogOut className="mr-2 h-4 w-4" />
-                    退出登录
+                    {t('common.logout')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
           </header>
 
-          {/* Main Content */}
           <main className="flex-1 p-6 bg-background">
             {children}
           </main>
         </div>
       </div>
-    </SidebarProvider>;
+    </SidebarProvider>
+  );
 }
