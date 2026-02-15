@@ -98,17 +98,9 @@ export default function UserDetail() {
         .eq('user_id', id);
       if (rolesError) throw rolesError;
 
-      // Check if user is linked to a guard
-      const { data: guard } = await supabase
-        .from('guards')
-        .select('*, companies(name)')
-        .eq('user_id', id)
-        .maybeSingle();
-
       return {
         ...profile,
         roles: roles?.map(r => r.role) || [],
-        guard,
       };
     },
     enabled: !!id,
@@ -133,54 +125,54 @@ export default function UserDetail() {
   const { data: patrolReports } = useQuery({
     queryKey: ['user-patrol-reports', id],
     queryFn: async () => {
-      if (!user?.guard?.id) return [];
+      if (!id) return [];
       
       const { data, error } = await supabase
         .from('patrol_reports')
         .select('*, sites(name)')
-        .eq('guard_id', user.guard.id)
+        .eq('guard_id', id)
         .order('start_time', { ascending: false })
         .limit(10);
       if (error) throw error;
       return data;
     },
-    enabled: !!user?.guard?.id,
+    enabled: !!id,
   });
 
   // Fetch alarms created by user
   const { data: alarms } = useQuery({
     queryKey: ['user-alarms', id],
     queryFn: async () => {
-      if (!user?.guard?.id) return [];
+      if (!id) return [];
       
       const { data, error } = await supabase
         .from('alarms')
         .select('*, sites(name)')
-        .eq('guard_id', user.guard.id)
+        .eq('guard_id', id)
         .order('created_at', { ascending: false })
         .limit(10);
       if (error) throw error;
       return data;
     },
-    enabled: !!user?.guard?.id,
+    enabled: !!id,
   });
 
   // Fetch attendance records
   const { data: attendanceRecords } = useQuery({
     queryKey: ['user-attendance', id],
     queryFn: async () => {
-      if (!user?.guard?.id) return [];
+      if (!id) return [];
       
       const { data, error } = await supabase
         .from('attendance')
         .select('*, projects(name)')
-        .eq('guard_id', user.guard.id)
+        .eq('guard_id', id)
         .order('date', { ascending: false })
         .limit(10);
       if (error) throw error;
       return data;
     },
-    enabled: !!user?.guard?.id,
+    enabled: !!id,
   });
 
   // Update user mutation
@@ -618,50 +610,37 @@ export default function UserDetail() {
           </CardContent>
         </Card>
 
-        {/* Guard Info (if linked) */}
+        {/* Guard Info */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5" />
               保安信息
             </CardTitle>
-            <CardDescription>
-              {user.guard ? '已关联保安账号' : '未关联保安账号'}
-            </CardDescription>
           </CardHeader>
           <CardContent>
-            {user.guard ? (
-              <div className="grid gap-3">
-                <div className="flex items-center gap-3">
-                  <span className="text-muted-foreground">工号:</span>
-                  <span>{user.guard.employee_id || '-'}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-muted-foreground">所属公司:</span>
-                  <span>{user.guard.companies?.name || '-'}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-muted-foreground">状态:</span>
-                  <Badge variant={user.guard.status === 'active' ? 'default' : 'secondary'}>
-                    {user.guard.status === 'active' ? '在职' : '离职'}
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-muted-foreground">联系电话:</span>
-                  <span>{user.guard.phone || '-'}</span>
-                </div>
+            <div className="grid gap-3">
+              <div className="flex items-center gap-3">
+                <span className="text-muted-foreground">工号:</span>
+                <span>{user.employee_id || '-'}</span>
               </div>
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                此用户未关联保安账号
+              <div className="flex items-center gap-3">
+                <span className="text-muted-foreground">状态:</span>
+                <Badge variant={user.guard_status === 'active' ? 'default' : 'secondary'}>
+                  {user.guard_status === 'active' ? '在职' : '离职'}
+                </Badge>
               </div>
-            )}
+              <div className="flex items-center gap-3">
+                <span className="text-muted-foreground">联系电话:</span>
+                <span>{user.phone || '-'}</span>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Activity Records */}
-      {user.guard && (
+      {user.roles?.includes('guard') && (
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Patrol Reports */}
           <Card>
@@ -759,7 +738,7 @@ export default function UserDetail() {
       )}
 
       {/* Alarms */}
-      {user.guard && (
+      {user.roles?.includes('guard') && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">

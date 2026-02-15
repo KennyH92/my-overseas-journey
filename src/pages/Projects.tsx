@@ -324,8 +324,8 @@ export default function Projects() {
                 <Select value={selectedGuardId} onValueChange={setSelectedGuardId}>
                   <SelectTrigger className="flex-1"><SelectValue placeholder={t('projects.selectGuard')} /></SelectTrigger>
                   <SelectContent>
-                    {guards.filter((g: any) => !morningGuards.find((a: any) => a.guard_id === g.id)).map((guard: any) => (
-                      <SelectItem key={guard.id} value={guard.id}>{guard.name} ({guard.employee_id || "-"})</SelectItem>
+                    {guardProfiles.filter((g: any) => !morningGuards.find((a: any) => a.guard_id === g.id)).map((guard: any) => (
+                      <SelectItem key={guard.id} value={guard.id}>{guard.full_name} ({guard.employee_id || "-"})</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -338,7 +338,7 @@ export default function Projects() {
                     <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">{t('projects.noMorningGuards')}</TableCell></TableRow>
                   ) : morningGuards.map((a: any) => (
                     <TableRow key={a.id}>
-                      <TableCell>{a.guards?.name}</TableCell><TableCell>{a.guards?.employee_id || "-"}</TableCell><TableCell>{a.guards?.phone || "-"}</TableCell>
+                      <TableCell>{a.profiles?.full_name}</TableCell><TableCell>{a.profiles?.employee_id || "-"}</TableCell><TableCell>{a.profiles?.phone || "-"}</TableCell>
                       <TableCell className="text-right"><Button variant="ghost" size="icon" onClick={() => removeAssignmentMutation.mutate(a.id)}><Trash2 className="h-4 w-4" /></Button></TableCell>
                     </TableRow>
                   ))}
@@ -350,8 +350,8 @@ export default function Projects() {
                 <Select value={selectedGuardId} onValueChange={setSelectedGuardId}>
                   <SelectTrigger className="flex-1"><SelectValue placeholder={t('projects.selectGuard')} /></SelectTrigger>
                   <SelectContent>
-                    {guards.filter((g: any) => !eveningGuards.find((a: any) => a.guard_id === g.id)).map((guard: any) => (
-                      <SelectItem key={guard.id} value={guard.id}>{guard.name} ({guard.employee_id || "-"})</SelectItem>
+                    {guardProfiles.filter((g: any) => !eveningGuards.find((a: any) => a.guard_id === g.id)).map((guard: any) => (
+                      <SelectItem key={guard.id} value={guard.id}>{guard.full_name} ({guard.employee_id || "-"})</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -364,7 +364,7 @@ export default function Projects() {
                     <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">{t('projects.noEveningGuards')}</TableCell></TableRow>
                   ) : eveningGuards.map((a: any) => (
                     <TableRow key={a.id}>
-                      <TableCell>{a.guards?.name}</TableCell><TableCell>{a.guards?.employee_id || "-"}</TableCell><TableCell>{a.guards?.phone || "-"}</TableCell>
+                      <TableCell>{a.profiles?.full_name}</TableCell><TableCell>{a.profiles?.employee_id || "-"}</TableCell><TableCell>{a.profiles?.phone || "-"}</TableCell>
                       <TableCell className="text-right"><Button variant="ghost" size="icon" onClick={() => removeAssignmentMutation.mutate(a.id)}><Trash2 className="h-4 w-4" /></Button></TableCell>
                     </TableRow>
                   ))}
