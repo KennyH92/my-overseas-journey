@@ -80,10 +80,10 @@ export default function Projects() {
     },
   });
 
-  const { data: guards = [] } = useQuery({
-    queryKey: ["guards"],
+  const { data: guardProfiles = [] } = useQuery({
+    queryKey: ["guard-profiles"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("guards").select("*").eq("status", "active").order("name");
+      const { data, error } = await supabase.from("profiles").select("id, full_name, employee_id, phone").eq("guard_status", "active").order("full_name");
       if (error) throw error;
       return data || [];
     },
@@ -93,7 +93,7 @@ export default function Projects() {
     queryKey: ["project_assignments", selectedProject?.id],
     queryFn: async () => {
       if (!selectedProject?.id) return [];
-      const { data, error } = await supabase.from("project_assignments").select(`*, guards (name, employee_id, phone)`).eq("project_id", selectedProject.id);
+      const { data, error } = await supabase.from("project_assignments").select(`*, profiles!guard_id(full_name, employee_id, phone)`).eq("project_id", selectedProject.id);
       if (error) throw error;
       return data || [];
     },
@@ -104,7 +104,7 @@ export default function Projects() {
     queryKey: ["attendance", selectedProject?.id, attendanceDate],
     queryFn: async () => {
       if (!selectedProject?.id) return [];
-      const { data, error } = await supabase.from("attendance").select(`*, guards (name, employee_id)`).eq("project_id", selectedProject.id).eq("date", attendanceDate);
+      const { data, error } = await supabase.from("attendance").select(`*, profiles!guard_id(full_name, employee_id)`).eq("project_id", selectedProject.id).eq("date", attendanceDate);
       if (error) throw error;
       return data || [];
     },

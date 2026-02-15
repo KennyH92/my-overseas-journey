@@ -17,7 +17,7 @@ const PatrolDetail = () => {
   const { data: report, isLoading } = useQuery({
     queryKey: ["patrol-report", id],
     queryFn: async () => {
-      const { data, error } = await supabase.from("patrol_reports").select(`*, guards(name, employee_id), sites(name, address), patrol_plans(name)`).eq("id", id!).maybeSingle();
+      const { data, error } = await supabase.from("patrol_reports").select(`*, profiles!guard_id(full_name, employee_id), sites(name, address), patrol_plans(name)`).eq("id", id!).maybeSingle();
       if (error) throw error;
       return data;
     },
@@ -58,8 +58,8 @@ const PatrolDetail = () => {
               <User className="h-5 w-5 text-muted-foreground" />
               <div>
                 <p className="text-sm text-muted-foreground">{t('patrolDetail.patroller')}</p>
-                <p className="font-medium">{report.guards?.name || t('patrolDetail.unassigned')}</p>
-                {report.guards?.employee_id && <p className="text-xs text-muted-foreground">{t('common.employeeId')}: {report.guards.employee_id}</p>}
+                <p className="font-medium">{(report as any).profiles?.full_name || t('patrolDetail.unassigned')}</p>
+                {(report as any).profiles?.employee_id && <p className="text-xs text-muted-foreground">{t('common.employeeId')}: {(report as any).profiles.employee_id}</p>}
               </div>
             </div>
             <div className="flex items-center gap-3">

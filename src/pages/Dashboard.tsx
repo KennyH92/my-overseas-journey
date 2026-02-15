@@ -18,16 +18,15 @@ export default function Dashboard() {
   const { t, i18n } = useTranslation();
   const dateLocale = i18n.language === 'zh' ? zhCN : enUS;
 
-  // Fetch dashboard statistics
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: async () => {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const [reportsRes, guardsRes, sitesRes, alarmsRes, checkpointsRes, plansRes] =
+      const [reportsRes, profilesRes, sitesRes, alarmsRes, checkpointsRes, plansRes] =
         await Promise.all([
           supabase.from("patrol_reports").select("id, status, start_time").gte("start_time", today.toISOString()),
-          supabase.from("guards").select("id, status"),
+          supabase.from("profiles").select("id, guard_status"),
           supabase.from("sites").select("id, status"),
           supabase.from("alarms").select("id, status, severity"),
           supabase.from("checkpoints").select("id, status"),
@@ -36,8 +35,8 @@ export default function Dashboard() {
       return {
         todayPatrols: (reportsRes.data || []).length,
         completedPatrols: (reportsRes.data || []).filter((r) => r.status === "completed").length,
-        activeGuards: (guardsRes.data || []).filter((g) => g.status === "active").length,
-        totalGuards: (guardsRes.data || []).length,
+        activeGuards: (profilesRes.data || []).filter((g) => g.guard_status === "active").length,
+        totalGuards: (profilesRes.data || []).length,
         activeSites: (sitesRes.data || []).filter((s) => s.status === "active").length,
         openAlarms: (alarmsRes.data || []).filter((a) => a.status === "open").length,
         highSeverityAlarms: (alarmsRes.data || []).filter((a) => a.status === "open" && a.severity === "high").length,
@@ -47,13 +46,12 @@ export default function Dashboard() {
     },
   });
 
-  // Fetch recent patrol reports
   const { data: recentReports, isLoading: reportsLoading } = useQuery({
     queryKey: ["recent-reports"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("patrol_reports")
-        .select(`id, status, start_time, end_time, guards(name), sites(name)`)
+        .select(`id, status, start_time, end_time, profiles!guard_id(full_name), sites(name)`)
         .order("start_time", { ascending: false })
         .limit(5);
       if (error) throw error;
@@ -61,13 +59,12 @@ export default function Dashboard() {
     },
   });
 
-  // Fetch recent alarms
   const { data: recentAlarms, isLoading: alarmsLoading } = useQuery({
     queryKey: ["recent-alarms"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("alarms")
-        .select(`id, title, severity, status, created_at, guards(name), sites(name)`)
+        .select(`id, title, severity, status, created_at, profiles!guard_id(full_name), sites(name)`)
         .order("created_at", { ascending: false })
         .limit(5);
       if (error) throw error;
@@ -187,14 +184,14 @@ export default function Dashboard() {
               <div className="space-y-3">{Array.from({ length: 3 }).map((_, i) => (<Skeleton key={i} className="h-16 w-full" />))}</div>
             ) : recentReports && recentReports.length > 0 ? (
               <div className="space-y-3">
-                {recentReports.map((report) => (
+                {recentReports.map((report: any) => (
                   <div key={report.id} className="flex items-center gap-4 p-3 rounded-lg bg-muted/50 hover:bg-muted cursor-pointer transition-colors" onClick={() => navigate(`/patrol/detail/${report.id}`)}>
                     <div className="flex-shrink-0">
                       {report.status === "completed" ? <CheckCircle className="h-5 w-5 text-green-500" /> : report.status === "missed" ? <XCircle className="h-5 w-5 text-destructive" /> : <Clock className="h-5 w-5 text-yellow-500" />}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-medium truncate">{report.guards?.name || t('dashboard.unknownGuard')}</p>
+                        <p className="text-sm font-medium truncate">{report.profiles?.full_name || t('dashboard.unknownGuard')}</p>
                         {getStatusBadge(report.status || "in_progress")}
                       </div>
                       <p className="text-xs text-muted-foreground truncate">
@@ -224,7 +221,7 @@ export default function Dashboard() {
               <div className="space-y-3">{Array.from({ length: 3 }).map((_, i) => (<Skeleton key={i} className="h-16 w-full" />))}</div>
             ) : recentAlarms && recentAlarms.length > 0 ? (
               <div className="space-y-3">
-                {recentAlarms.map((alarm) => (
+                {recentAlarms.map((alarm: any) => (
                   <div key={alarm.id} className="flex items-center gap-4 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
                     <div className="flex-shrink-0"><AlertTriangle className={`h-5 w-5 ${getSeverityColor(alarm.severity || "medium")}`} /></div>
                     <div className="flex-1 min-w-0">

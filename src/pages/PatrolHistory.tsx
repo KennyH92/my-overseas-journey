@@ -22,7 +22,7 @@ const PatrolHistory = () => {
   const { data: reports, isLoading } = useQuery({
     queryKey: ["patrol-history", statusFilter, dateFilter],
     queryFn: async () => {
-      let query = supabase.from("patrol_reports").select(`*, guards(name, employee_id), sites(name), patrol_plans(name)`).order("start_time", { ascending: false });
+      let query = supabase.from("patrol_reports").select(`*, profiles!guard_id(full_name, employee_id), sites(name), patrol_plans(name)`).order("start_time", { ascending: false });
       if (statusFilter !== "all") query = query.eq("status", statusFilter);
       if (dateFilter) {
         const startDate = new Date(dateFilter);
@@ -36,10 +36,10 @@ const PatrolHistory = () => {
     },
   });
 
-  const filteredReports = reports?.filter((report) => {
+  const filteredReports = reports?.filter((report: any) => {
     if (!searchTerm) return true;
     const term = searchTerm.toLowerCase();
-    return report.guards?.name?.toLowerCase().includes(term) || report.sites?.name?.toLowerCase().includes(term) || report.patrol_plans?.name?.toLowerCase().includes(term);
+    return report.profiles?.full_name?.toLowerCase().includes(term) || report.sites?.name?.toLowerCase().includes(term) || report.patrol_plans?.name?.toLowerCase().includes(term);
   });
 
   const getStatusBadge = (status: string) => {
@@ -102,12 +102,12 @@ const PatrolHistory = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredReports.map((report) => {
+                {filteredReports.map((report: any) => {
                   const duration = report.end_time ? Math.round((new Date(report.end_time).getTime() - new Date(report.start_time).getTime()) / 60000) : null;
                   return (
                     <TableRow key={report.id}>
                       <TableCell>{format(new Date(report.start_time), "yyyy-MM-dd HH:mm")}</TableCell>
-                      <TableCell>{report.guards?.name || "-"}</TableCell>
+                      <TableCell>{report.profiles?.full_name || "-"}</TableCell>
                       <TableCell>{report.sites?.name || "-"}</TableCell>
                       <TableCell>{report.patrol_plans?.name || "-"}</TableCell>
                       <TableCell>{getStatusBadge(report.status || "in_progress")}</TableCell>

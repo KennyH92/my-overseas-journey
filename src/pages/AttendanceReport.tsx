@@ -36,7 +36,7 @@ export default function AttendanceReport() {
   const { data: attendanceData = [], isLoading } = useQuery({
     queryKey: ["attendance-report", selectedYear, selectedMonth, selectedProject],
     queryFn: async () => {
-      let query = supabase.from("attendance").select(`*, guards (name, employee_id), projects (name)`).gte("date", format(monthStart, "yyyy-MM-dd")).lte("date", format(monthEnd, "yyyy-MM-dd"));
+      let query = supabase.from("attendance").select(`*, profiles!guard_id(full_name, employee_id), projects(name)`).gte("date", format(monthStart, "yyyy-MM-dd")).lte("date", format(monthEnd, "yyyy-MM-dd"));
       if (selectedProject !== "all") { query = query.eq("project_id", selectedProject); }
       const { data, error } = await query; if (error) throw error; return data || [];
     },
@@ -44,16 +44,16 @@ export default function AttendanceReport() {
 
   const { data: assignments = [] } = useQuery({
     queryKey: ["project-assignments-report", selectedProject],
-    queryFn: async () => { let query = supabase.from("project_assignments").select(`*, guards (name, employee_id), projects (name)`); if (selectedProject !== "all") { query = query.eq("project_id", selectedProject); } const { data, error } = await query; if (error) throw error; return data || []; },
+    queryFn: async () => { let query = supabase.from("project_assignments").select(`*, profiles!guard_id(full_name, employee_id), projects(name)`); if (selectedProject !== "all") { query = query.eq("project_id", selectedProject); } const { data, error } = await query; if (error) throw error; return data || []; },
   });
 
   const { data: anomalousRecords = [] } = useQuery({
     queryKey: ["site-attendance-anomalous", selectedYear, selectedMonth],
-    queryFn: async () => { const { data, error } = await supabase.from("site_attendance").select("*, guards(name, employee_id), sites(name)").in("status", ["system_auto_closed", "late_close"]).gte("date", format(monthStart, "yyyy-MM-dd")).lte("date", format(monthEnd, "yyyy-MM-dd")).order("date", { ascending: false }); if (error) throw error; return data || []; },
+    queryFn: async () => { const { data, error } = await supabase.from("site_attendance").select("*, profiles!guard_id(full_name, employee_id), sites(name)").in("status", ["system_auto_closed", "late_close"]).gte("date", format(monthStart, "yyyy-MM-dd")).lte("date", format(monthEnd, "yyyy-MM-dd")).order("date", { ascending: false }); if (error) throw error; return data || []; },
   });
 
   const workingDays = eachDayOfInterval({ start: monthStart, end: monthEnd }).filter((d) => !isWeekend(d)).length;
-  const statusCounts = attendanceData.reduce((acc, record) => { acc[record.status] = (acc[record.status] || 0) + 1; return acc; }, {} as Record<string, number>);
+  const statusCounts = attendanceData.reduce((acc: any, record: any) => { acc[record.status] = (acc[record.status] || 0) + 1; return acc; }, {} as Record<string, number>);
   const presentCount = statusCounts.present || 0;
   const absentCount = statusCounts.absent || 0;
   const lateCount = statusCounts.late || 0;
@@ -70,32 +70,32 @@ export default function AttendanceReport() {
 
   const dailyData = eachDayOfInterval({ start: monthStart, end: monthEnd }).map((date) => {
     const dateStr = format(date, "yyyy-MM-dd");
-    const dayRecords = attendanceData.filter((r) => r.date === dateStr);
+    const dayRecords = attendanceData.filter((r: any) => r.date === dateStr);
     return {
       date: format(date, "MM/dd"),
-      [t('attendance.present')]: dayRecords.filter((r) => r.status === "present").length,
-      [t('attendance.absent')]: dayRecords.filter((r) => r.status === "absent").length,
-      [t('attendance.late')]: dayRecords.filter((r) => r.status === "late").length,
-      [t('attendance.leave')]: dayRecords.filter((r) => r.status === "leave").length,
+      [t('attendance.present')]: dayRecords.filter((r: any) => r.status === "present").length,
+      [t('attendance.absent')]: dayRecords.filter((r: any) => r.status === "absent").length,
+      [t('attendance.late')]: dayRecords.filter((r: any) => r.status === "late").length,
+      [t('attendance.leave')]: dayRecords.filter((r: any) => r.status === "leave").length,
     };
   });
 
-  const projectSummary = projects.map((project) => {
-    const projectRecords = attendanceData.filter((r) => r.project_id === project.id);
+  const projectSummary = projects.map((project: any) => {
+    const projectRecords = attendanceData.filter((r: any) => r.project_id === project.id);
     const projectAssignments = assignments.filter((a: any) => a.project_id === project.id);
-    const pPresent = projectRecords.filter((r) => r.status === "present").length;
-    const pLate = projectRecords.filter((r) => r.status === "late").length;
-    const pAbsent = projectRecords.filter((r) => r.status === "absent").length;
-    const pLeave = projectRecords.filter((r) => r.status === "leave").length;
+    const pPresent = projectRecords.filter((r: any) => r.status === "present").length;
+    const pLate = projectRecords.filter((r: any) => r.status === "late").length;
+    const pAbsent = projectRecords.filter((r: any) => r.status === "absent").length;
+    const pLeave = projectRecords.filter((r: any) => r.status === "leave").length;
     const pTotal = projectRecords.length;
     const rate = pTotal > 0 ? ((pPresent + pLate) / pTotal * 100).toFixed(1) : "0";
     return { id: project.id, name: project.name, totalGuards: projectAssignments.length, present: pPresent, late: pLate, absent: pAbsent, leave: pLeave, total: pTotal, rate: parseFloat(rate) };
-  }).filter((p) => selectedProject === "all" || p.id === selectedProject);
+  }).filter((p: any) => selectedProject === "all" || p.id === selectedProject);
 
   const guardDetails = Object.values(
-    attendanceData.reduce((acc, record) => {
+    attendanceData.reduce((acc: any, record: any) => {
       const key = record.guard_id;
-      if (!acc[key]) { acc[key] = { guardId: key, name: record.guards?.name || t('common.unknown'), employeeId: record.guards?.employee_id || "-", present: 0, absent: 0, late: 0, leave: 0, total: 0 }; }
+      if (!acc[key]) { acc[key] = { guardId: key, name: record.profiles?.full_name || t('common.unknown'), employeeId: record.profiles?.employee_id || "-", present: 0, absent: 0, late: 0, leave: 0, total: 0 }; }
       acc[key][record.status]++; acc[key].total++; return acc;
     }, {} as Record<string, any>)
   );
@@ -183,7 +183,7 @@ export default function AttendanceReport() {
                 <TableBody>
                   {projectSummary.length === 0 ? (
                     <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground">{t('common.noData')}</TableCell></TableRow>
-                  ) : projectSummary.map((p) => (
+                  ) : projectSummary.map((p: any) => (
                     <TableRow key={p.id}>
                       <TableCell className="font-medium">{p.name}</TableCell><TableCell className="text-center">{p.totalGuards}</TableCell>
                       <TableCell className="text-center text-green-600">{p.present}</TableCell><TableCell className="text-center text-yellow-600">{p.late}</TableCell>
@@ -240,7 +240,7 @@ export default function AttendanceReport() {
                   <TableBody>
                     {anomalousRecords.map((r: any) => (
                       <TableRow key={r.id} className="bg-destructive/5">
-                        <TableCell>{r.date}</TableCell><TableCell className="font-medium">{r.guards?.name || '-'}</TableCell><TableCell>{r.guards?.employee_id || '-'}</TableCell>
+                        <TableCell>{r.date}</TableCell><TableCell className="font-medium">{r.profiles?.full_name || '-'}</TableCell><TableCell>{r.profiles?.employee_id || '-'}</TableCell>
                         <TableCell>{r.sites?.name || '-'}</TableCell>
                         <TableCell className="text-center">{r.check_in_time ? format(new Date(r.check_in_time), 'HH:mm') : '-'}</TableCell>
                         <TableCell className="text-center">{r.check_out_time ? format(new Date(r.check_out_time), 'HH:mm') : '-'}</TableCell>

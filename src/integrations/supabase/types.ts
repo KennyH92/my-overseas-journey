@@ -74,7 +74,7 @@ export type Database = {
             foreignKeyName: "alarms_guard_id_fkey"
             columns: ["guard_id"]
             isOneToOne: false
-            referencedRelation: "guards"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -135,7 +135,7 @@ export type Database = {
             foreignKeyName: "attendance_guard_id_fkey"
             columns: ["guard_id"]
             isOneToOne: false
-            referencedRelation: "guards"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -232,50 +232,6 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
-      }
-      guards: {
-        Row: {
-          company_id: string | null
-          created_at: string | null
-          employee_id: string | null
-          id: string
-          name: string
-          phone: string | null
-          status: string | null
-          updated_at: string | null
-          user_id: string | null
-        }
-        Insert: {
-          company_id?: string | null
-          created_at?: string | null
-          employee_id?: string | null
-          id?: string
-          name: string
-          phone?: string | null
-          status?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          company_id?: string | null
-          created_at?: string | null
-          employee_id?: string | null
-          id?: string
-          name?: string
-          phone?: string | null
-          status?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "guards_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       notices: {
         Row: {
@@ -421,7 +377,7 @@ export type Database = {
             foreignKeyName: "patrol_plans_guard_id_fkey"
             columns: ["guard_id"]
             isOneToOne: false
-            referencedRelation: "guards"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -529,7 +485,7 @@ export type Database = {
             foreignKeyName: "patrol_reports_guard_id_fkey"
             columns: ["guard_id"]
             isOneToOne: false
-            referencedRelation: "guards"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -552,10 +508,12 @@ export type Database = {
         Row: {
           avatar_url: string | null
           birth_date: string | null
+          company_id: string | null
           created_at: string | null
           email: string | null
           employee_id: string | null
           full_name: string
+          guard_status: string | null
           id: string
           id_number: string | null
           is_first_login: boolean | null
@@ -568,10 +526,12 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           birth_date?: string | null
+          company_id?: string | null
           created_at?: string | null
           email?: string | null
           employee_id?: string | null
           full_name: string
+          guard_status?: string | null
           id: string
           id_number?: string | null
           is_first_login?: boolean | null
@@ -584,10 +544,12 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           birth_date?: string | null
+          company_id?: string | null
           created_at?: string | null
           email?: string | null
           employee_id?: string | null
           full_name?: string
+          guard_status?: string | null
           id?: string
           id_number?: string | null
           is_first_login?: boolean | null
@@ -597,7 +559,15 @@ export type Database = {
           updated_at?: string | null
           work_permit_expiry_date?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       project_assignments: {
         Row: {
@@ -632,7 +602,7 @@ export type Database = {
             foreignKeyName: "project_assignments_guard_id_fkey"
             columns: ["guard_id"]
             isOneToOne: false
-            referencedRelation: "guards"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -754,7 +724,7 @@ export type Database = {
             foreignKeyName: "site_attendance_guard_id_fkey"
             columns: ["guard_id"]
             isOneToOne: false
-            referencedRelation: "guards"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
