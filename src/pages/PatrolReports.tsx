@@ -48,7 +48,7 @@ export default function PatrolReports() {
   });
 
   const { data: plans = [] } = useQuery({ queryKey: ['patrol-plans'], queryFn: async () => { const { data, error } = await supabase.from('patrol_plans').select('id, name').eq('status', 'active'); if (error) throw error; return data || []; } });
-  const { data: guards = [] } = useQuery({ queryKey: ['guards'], queryFn: async () => { const { data, error } = await supabase.from('guards').select('id, name').eq('status', 'active'); if (error) throw error; return data || []; } });
+  const { data: guardProfiles = [] } = useQuery({ queryKey: ['guard-profiles'], queryFn: async () => { const { data, error } = await supabase.from('profiles').select('id, full_name, employee_id').eq('guard_status', 'active'); if (error) throw error; return data || []; } });
   const { data: sites = [] } = useQuery({ queryKey: ['sites'], queryFn: async () => { const { data, error } = await supabase.from('sites').select('id, name').eq('status', 'active'); if (error) throw error; return data || []; } });
 
   const { data: reportCheckpoints = [] } = useQuery({
@@ -83,7 +83,7 @@ export default function PatrolReports() {
   const handleDelete = (id: string) => { if (confirm(t('patrolReports.deleteConfirm'))) { deleteMutation.mutate(id); } };
 
   const getPlanName = (planId: string | null) => { if (!planId) return '-'; return plans.find((p) => p.id === planId)?.name || '-'; };
-  const getGuardName = (guardId: string | null) => { if (!guardId) return '-'; return guards.find((g) => g.id === guardId)?.name || '-'; };
+  const getGuardName = (guardId: string | null) => { if (!guardId) return '-'; return guardProfiles.find((g) => g.id === guardId)?.full_name || '-'; };
   const getSiteName = (siteId: string | null) => { if (!siteId) return '-'; return sites.find((s) => s.id === siteId)?.name || '-'; };
 
   const getStatusBadge = (status: string | null) => {
@@ -198,7 +198,7 @@ export default function PatrolReports() {
                 <FormField control={form.control} name="guard_id" render={({ field }) => (
                   <FormItem><FormLabel>{t('patrolReports.guard')}</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder={t('patrolReports.selectGuard')} /></SelectTrigger></FormControl>
-                      <SelectContent><SelectItem value="">{t('patrolReports.unspecified')}</SelectItem>{guards.map((guard) => (<SelectItem key={guard.id} value={guard.id}>{guard.name}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>
+                      <SelectContent><SelectItem value="">{t('patrolReports.unspecified')}</SelectItem>{guardProfiles.map((g) => (<SelectItem key={g.id} value={g.id}>{g.full_name}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>
                 )} />
                 <FormField control={form.control} name="site_id" render={({ field }) => (
                   <FormItem><FormLabel>{t('patrolReports.site')}</FormLabel>
@@ -259,15 +259,13 @@ export default function PatrolReports() {
                         <TableHead>{t('patrol.checkpoint')}</TableHead>
                         <TableHead>{t('common.time')}</TableHead>
                         <TableHead>{t('common.status')}</TableHead>
-                        <TableHead>{t('common.notes')}</TableHead>
                       </TableRow></TableHeader>
                       <TableBody>
                         {reportCheckpoints.map((cp: any) => (
                           <TableRow key={cp.id}>
                             <TableCell>{cp.checkpoints?.name || '-'}</TableCell>
                             <TableCell>{formatDateTime(cp.visited_at)}</TableCell>
-                            <TableCell><Badge variant={cp.status === 'completed' ? 'secondary' : 'outline'}>{cp.status === 'completed' ? t('patrolReports.statusCompleted') : cp.status}</Badge></TableCell>
-                            <TableCell>{cp.notes || '-'}</TableCell>
+                            <TableCell><Badge variant={cp.status === 'completed' ? 'default' : 'secondary'}>{cp.status}</Badge></TableCell>
                           </TableRow>
                         ))}
                       </TableBody>

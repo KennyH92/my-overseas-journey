@@ -14,7 +14,7 @@ import Dashboard from "./pages/Dashboard";
 import Sites from "./pages/Sites";
 import ScanCheckIn from "./pages/ScanCheckIn";
 // Checkpoints is now integrated into Sites page
-import Guards from "./pages/Guards";
+// Guards page removed - merged into profiles
 import Projects from "./pages/Projects";
 import Notices from "./pages/Notices";
 import PatrolPlans from "./pages/PatrolPlans";
@@ -118,14 +118,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="/guards"
-              element={
-                <ProtectedRoute>
-                  <Guards />
-                </ProtectedRoute>
-              }
-            />
+            {/* Guards page removed - merged into profiles */}
             <Route
               path="/projects"
               element={

@@ -23,7 +23,7 @@ const PatrolCalendar = () => {
   const { data: reports } = useQuery({
     queryKey: ["patrol-calendar", format(currentMonth, "yyyy-MM")],
     queryFn: async () => {
-      const { data, error } = await supabase.from("patrol_reports").select(`*, guards(name), sites(name)`).gte("start_time", monthStart.toISOString()).lte("start_time", monthEnd.toISOString()).order("start_time", { ascending: true });
+      const { data, error } = await supabase.from("patrol_reports").select(`*, profiles!guard_id(full_name), sites(name)`).gte("start_time", monthStart.toISOString()).lte("start_time", monthEnd.toISOString()).order("start_time", { ascending: true });
       if (error) throw error;
       return data;
     },
@@ -84,10 +84,10 @@ const PatrolCalendar = () => {
             {selectedDate ? (
               selectedReports.length > 0 ? (
                 <div className="space-y-3">
-                  {selectedReports.map((report) => (
+                  {selectedReports.map((report: any) => (
                     <div key={report.id} className="p-3 rounded-lg border bg-muted/50 space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="font-medium">{report.guards?.name || t('common.unknown')}</span>
+                        <span className="font-medium">{report.profiles?.full_name || t('common.unknown')}</span>
                         <Badge variant={report.status === "completed" ? "default" : report.status === "missed" ? "destructive" : "secondary"}>
                           {report.status === "completed" ? t('dashboard.statusCompleted') : report.status === "missed" ? t('dashboard.statusMissed') : t('dashboard.statusInProgress')}
                         </Badge>

@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Camera, CheckCircle2, LogIn, LogOut, MapPin, Clock, XCircle, ScanLine, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 import MissingCheckoutDialog from '@/components/scan/MissingCheckoutDialog';
+import { useHasRole } from '@/hooks/use-user-roles';
 
 interface QRData { type: string; site_id: string; site_name: string; code?: string; }
 type ScanResult = { status: 'check_in' | 'check_out'; site_name: string; time: string; } | null;
@@ -27,27 +28,25 @@ export default function ScanCheckIn() {
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const processingRef = useRef(false);
   const [unresolvedRecord, setUnresolvedRecord] = useState<UnresolvedRecord | null>(null);
+  const { hasAccess: isGuard } = useHasRole(['guard']);
 
-  const { data: guard } = useQuery({
-    queryKey: ['my-guard', user?.id],
-    queryFn: async () => { if (!user?.id) return null; const { data, error } = await supabase.from('guards').select('id, name').eq('user_id', user.id).eq('status', 'active').maybeSingle(); if (error) throw error; return data; },
-    enabled: !!user?.id,
-  });
+  // Guard ID is now the user's auth ID (profiles.id)
+  const guardId = user?.id || null;
 
   const today = format(new Date(), 'yyyy-MM-dd');
   const { data: todayRecords = [], refetch: refetchRecords } = useQuery({
-    queryKey: ['site-attendance-today', guard?.id, today],
-    queryFn: async () => { if (!guard?.id) return []; const { data, error } = await supabase.from('site_attendance').select('*, sites(name, address)').eq('guard_id', guard.id).eq('date', today).order('check_in_time', { ascending: false }); if (error) throw error; return data || []; },
-    enabled: !!guard?.id,
+    queryKey: ['site-attendance-today', guardId, today],
+    queryFn: async () => { if (!guardId) return []; const { data, error } = await supabase.from('site_attendance').select('*, sites(name, address)').eq('guard_id', guardId).eq('date', today).order('check_in_time', { ascending: false }); if (error) throw error; return data || []; },
+    enabled: !!guardId,
   });
 
   const resolveMutation = useMutation({
     mutationFn: async ({ oldRecordId, fixOutTime, newSiteId }: { oldRecordId: string; fixOutTime: string; newSiteId?: string }) => {
-      if (!guard?.id) throw new Error(t('scanCheckIn.noGuardRecord'));
+      if (!guardId) throw new Error(t('scanCheckIn.noGuardRecord'));
       const { error: updateErr } = await supabase.from('site_attendance').update({ check_out_time: fixOutTime, status: 'late_close' }).eq('id', oldRecordId);
       if (updateErr) throw updateErr;
       if (newSiteId) {
-        const { error: insertErr } = await supabase.from('site_attendance').insert({ guard_id: guard.id, site_id: newSiteId, date: today, check_in_time: new Date().toISOString(), status: 'checked_in' });
+        const { error: insertErr } = await supabase.from('site_attendance').insert({ guard_id: guardId, site_id: newSiteId, date: today, check_in_time: new Date().toISOString(), status: 'checked_in' });
         if (insertErr) throw insertErr;
         return { action: 'resolved_and_checked_in' as const };
       }
@@ -58,8 +57,8 @@ export default function ScanCheckIn() {
 
   const checkInMutation = useMutation({
     mutationFn: async ({ siteId, siteName }: { siteId: string; siteName: string }) => {
-      if (!guard?.id) throw new Error(t('scanCheckIn.noGuardRecord'));
-      const { data: unresolvedRecords, error: checkErr } = await supabase.from('site_attendance').select('id, site_id, sites(name)').eq('guard_id', guard.id).eq('status', 'checked_in');
+      if (!guardId) throw new Error(t('scanCheckIn.noGuardRecord'));
+      const { data: unresolvedRecords, error: checkErr } = await supabase.from('site_attendance').select('id, site_id, sites(name)').eq('guard_id', guardId).eq('status', 'checked_in');
       if (checkErr) throw checkErr;
       if (unresolvedRecords && unresolvedRecords.length > 0) {
         const oldRecord = unresolvedRecords[0] as any;
@@ -71,7 +70,7 @@ export default function ScanCheckIn() {
         }
         throw { isConflict: true, recordId: oldRecord.id, siteName: oldRecord.sites?.name || t('scanCheckIn.unknownSite'), pendingSiteId: siteId, pendingSiteName: siteName };
       }
-      const { error } = await supabase.from('site_attendance').insert({ guard_id: guard.id, site_id: siteId, date: today, check_in_time: new Date().toISOString(), status: 'checked_in' });
+      const { error } = await supabase.from('site_attendance').insert({ guard_id: guardId, site_id: siteId, date: today, check_in_time: new Date().toISOString(), status: 'checked_in' });
       if (error) { if (error.code === '23505') { throw new Error(t('scanCheckIn.invalidQR')); } throw error; }
       return { action: 'check_in' as const };
     },
@@ -126,7 +125,7 @@ export default function ScanCheckIn() {
     }
   };
 
-  if (!guard) {
+  if (!user || !isGuard) {
     return (
       <div className="space-y-6">
         <div><h1 className="text-3xl font-bold text-foreground">{t('scanCheckIn.title')}</h1><p className="text-muted-foreground mt-1">{t('scanCheckIn.description')}</p></div>

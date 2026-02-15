@@ -47,9 +47,9 @@ export default function PatrolPlans() {
     queryFn: async () => { const { data, error } = await supabase.from('sites').select('id, name').eq('status', 'active'); if (error) throw error; return data || []; },
   });
 
-  const { data: guards = [] } = useQuery({
-    queryKey: ['guards'],
-    queryFn: async () => { const { data, error } = await supabase.from('guards').select('id, name').eq('status', 'active'); if (error) throw error; return data || []; },
+  const { data: guardProfiles = [] } = useQuery({
+    queryKey: ['guard-profiles'],
+    queryFn: async () => { const { data, error } = await supabase.from('profiles').select('id, full_name, employee_id').eq('guard_status', 'active'); if (error) throw error; return data || []; },
   });
 
   const createMutation = useMutation({
@@ -84,7 +84,7 @@ export default function PatrolPlans() {
   const handleDelete = (id: string) => { if (confirm(t('patrolPlans.deleteConfirm'))) { deleteMutation.mutate(id); } };
 
   const getSiteName = (siteId: string) => sites.find((s) => s.id === siteId)?.name || '-';
-  const getGuardName = (guardId: string | null) => { if (!guardId) return '-'; return guards.find((g) => g.id === guardId)?.name || '-'; };
+  const getGuardName = (guardId: string | null) => { if (!guardId) return '-'; const p = guardProfiles.find((g) => g.id === guardId); return p?.full_name || '-'; };
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, 'default' | 'secondary' | 'destructive'> = { active: 'default', inactive: 'secondary', completed: 'destructive' };
@@ -119,7 +119,7 @@ export default function PatrolPlans() {
                   <FormField control={form.control} name="guard_id" render={({ field }) => (
                     <FormItem><FormLabel>{t('patrolPlans.responsibleGuard')}</FormLabel>
                       <Select onValueChange={(val) => field.onChange(val === 'none' ? '' : val)} value={field.value || 'none'}><FormControl><SelectTrigger><SelectValue placeholder={t('patrolPlans.selectGuard')} /></SelectTrigger></FormControl>
-                        <SelectContent><SelectItem value="none">{t('patrolReports.unspecified')}</SelectItem>{guards.map((guard) => (<SelectItem key={guard.id} value={guard.id}>{guard.name}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>
+                        <SelectContent><SelectItem value="none">{t('patrolReports.unspecified')}</SelectItem>{guardProfiles.map((g) => (<SelectItem key={g.id} value={g.id}>{g.full_name}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>
                   )} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">

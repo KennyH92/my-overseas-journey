@@ -12,13 +12,13 @@ const PatrolCharts = () => {
   const { data: stats } = useQuery({
     queryKey: ["patrol-stats"],
     queryFn: async () => {
-      const [reportsRes, guardsRes, sitesRes, alarmsRes] = await Promise.all([
+      const [reportsRes, profilesRes, sitesRes, alarmsRes] = await Promise.all([
         supabase.from("patrol_reports").select("id, status, start_time"),
-        supabase.from("guards").select("id, status"),
+        supabase.from("profiles").select("id, guard_status"),
         supabase.from("sites").select("id, status"),
         supabase.from("alarms").select("id, status, severity"),
       ]);
-      return { reports: reportsRes.data || [], guards: guardsRes.data || [], sites: sitesRes.data || [], alarms: alarmsRes.data || [] };
+      return { reports: reportsRes.data || [], profiles: profilesRes.data || [], sites: sitesRes.data || [], alarms: alarmsRes.data || [] };
     },
   });
 
@@ -54,7 +54,7 @@ const PatrolCharts = () => {
       <h1 className="text-2xl font-bold">{t('patrolCharts.title')}</h1>
       <div className="grid gap-4 md:grid-cols-4">
         <Card><CardContent className="pt-6"><div className="flex items-center gap-4"><div className="p-3 rounded-lg bg-primary/10"><ClipboardCheck className="h-6 w-6 text-primary" /></div><div><p className="text-sm text-muted-foreground">{t('patrolCharts.totalPatrols')}</p><p className="text-2xl font-bold">{stats?.reports.length || 0}</p></div></div></CardContent></Card>
-        <Card><CardContent className="pt-6"><div className="flex items-center gap-4"><div className="p-3 rounded-lg bg-green-500/10"><Users className="h-6 w-6 text-green-500" /></div><div><p className="text-sm text-muted-foreground">{t('patrolCharts.activePatrollers')}</p><p className="text-2xl font-bold">{stats?.guards.filter((g) => g.status === "active").length || 0}</p></div></div></CardContent></Card>
+        <Card><CardContent className="pt-6"><div className="flex items-center gap-4"><div className="p-3 rounded-lg bg-green-500/10"><Users className="h-6 w-6 text-green-500" /></div><div><p className="text-sm text-muted-foreground">{t('patrolCharts.activePatrollers')}</p><p className="text-2xl font-bold">{stats?.profiles.filter((g) => g.guard_status === "active").length || 0}</p></div></div></CardContent></Card>
         <Card><CardContent className="pt-6"><div className="flex items-center gap-4"><div className="p-3 rounded-lg bg-blue-500/10"><MapPin className="h-6 w-6 text-blue-500" /></div><div><p className="text-sm text-muted-foreground">{t('patrolCharts.activeSites')}</p><p className="text-2xl font-bold">{stats?.sites.filter((s) => s.status === "active").length || 0}</p></div></div></CardContent></Card>
         <Card><CardContent className="pt-6"><div className="flex items-center gap-4"><div className="p-3 rounded-lg bg-destructive/10"><AlertTriangle className="h-6 w-6 text-destructive" /></div><div><p className="text-sm text-muted-foreground">{t('patrolCharts.pendingAlarms')}</p><p className="text-2xl font-bold">{stats?.alarms.filter((a) => a.status === "open").length || 0}</p></div></div></CardContent></Card>
       </div>
