@@ -76,6 +76,7 @@
   "nav": {
     "dashboard": "Papan Pemuka",
     "scanCheckIn": "Imbas Daftar Masuk",
+    "myProfile": "Profil Saya",
     "setup": "Tetapan",
     "companies": "Syarikat",
     "projects": "Pelanggan/Projek",
@@ -91,6 +92,18 @@
     "attendanceReport": "Laporan Kehadiran",
     "systemManagement": "Pengurusan Sistem",
     "userManagement": "Pengguna & Peranan"
+  },
+  "myProfile": {
+    "title": "Profil Saya",
+    "description": "Lihat dan edit maklumat peribadi anda",
+    "accountInfo": "Maklumat Akaun",
+    "accountInfoDesc": "Maklumat ini diurus oleh pentadbir",
+    "personalInfo": "Maklumat Peribadi",
+    "personalInfoDesc": "Anda boleh mengemas kini butiran berikut",
+    "company": "Syarikat",
+    "birthDate": "Tarikh Lahir",
+    "idNumber": "Nombor ID",
+    "nameRequired": "Nama diperlukan"
   },
   "header": {
     "patrol": "RONDAAN"

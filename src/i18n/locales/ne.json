@@ -76,6 +76,7 @@
   "nav": {
     "dashboard": "ड्यासबोर्ड",
     "scanCheckIn": "स्क्यान चेक-इन",
+    "myProfile": "मेरो प्रोफाइल",
     "setup": "सेटअप",
     "companies": "कम्पनीहरू",
     "projects": "ग्राहक/परियोजना",
@@ -91,6 +92,18 @@
     "attendanceReport": "हाजिरी रिपोर्ट",
     "systemManagement": "प्रणाली व्यवस्थापन",
     "userManagement": "प्रयोगकर्ता र भूमिका"
+  },
+  "myProfile": {
+    "title": "मेरो प्रोफाइल",
+    "description": "आफ्नो व्यक्तिगत जानकारी हेर्नुहोस् र सम्पादन गर्नुहोस्",
+    "accountInfo": "खाता जानकारी",
+    "accountInfoDesc": "यी फिल्डहरू प्रशासकद्वारा व्यवस्थित छन्",
+    "personalInfo": "व्यक्तिगत जानकारी",
+    "personalInfoDesc": "तपाईं निम्न विवरणहरू अपडेट गर्न सक्नुहुन्छ",
+    "company": "कम्पनी",
+    "birthDate": "जन्म मिति",
+    "idNumber": "परिचयपत्र नम्बर",
+    "nameRequired": "नाम आवश्यक छ"
   },
   "header": {
     "patrol": "गस्ती"

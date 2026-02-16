@@ -28,6 +28,7 @@ import PatrolHistory from "./pages/PatrolHistory";
 import PatrolCharts from "./pages/PatrolCharts";
 import PatrolCalendar from "./pages/PatrolCalendar";
 import AttendanceReport from "./pages/AttendanceReport";
+import MyProfile from "./pages/MyProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -220,6 +221,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <AttendanceReport />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/my-profile"
+              element={
+                <ProtectedRoute>
+                  <MyProfile />
                 </ProtectedRoute>
               }
             />
