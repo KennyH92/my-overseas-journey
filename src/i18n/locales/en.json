@@ -76,6 +76,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "scanCheckIn": "Scan Check-in",
+    "myProfile": "My Profile",
     "setup": "Setup",
     "companies": "Companies",
     "projects": "Customers/Projects",
@@ -91,6 +92,18 @@
     "attendanceReport": "Attendance Report",
     "systemManagement": "System Management",
     "userManagement": "Users & Roles"
+  },
+  "myProfile": {
+    "title": "My Profile",
+    "description": "View and edit your personal information",
+    "accountInfo": "Account Information",
+    "accountInfoDesc": "These fields are managed by your administrator",
+    "personalInfo": "Personal Information",
+    "personalInfoDesc": "You can update the following details",
+    "company": "Company",
+    "birthDate": "Date of Birth",
+    "idNumber": "ID Number",
+    "nameRequired": "Name is required"
   },
   "header": {
     "patrol": "PATROL"

@@ -1,11 +1,12 @@
 import { useTranslation } from 'react-i18next';
 import { 
-  Home, Users, MapPin, ClipboardList, 
+  Home, Users, MapPin, 
   FileText, Bell, Calendar, Shield,
   Settings, UserCog, History,
-  BarChart3, CalendarDays, PieChart, ScanLine
+  BarChart3, CalendarDays, PieChart, ScanLine, UserCircle
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
+import { useUserRoles } from '@/hooks/use-user-roles';
 import {
   Sidebar,
   SidebarContent,
@@ -22,6 +23,9 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
   const { t } = useTranslation();
+  const { data: roles = [] } = useUserRoles();
+
+  const isGuardOnly = roles.length > 0 && roles.every(r => r === 'guard');
 
   const setupItems = [
     { title: t('nav.companies'), url: '/companies', icon: Users },
@@ -50,14 +54,16 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <NavLink to="/dashboard" end>
-                    <Home className="h-4 w-4" />
-                    {!collapsed && <span>{t('nav.dashboard')}</span>}
-                  </NavLink>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {!isGuardOnly && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink to="/dashboard" end>
+                      <Home className="h-4 w-4" />
+                      {!collapsed && <span>{t('nav.dashboard')}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <NavLink to="/scan-checkin">
@@ -66,63 +72,75 @@ export function AppSidebar() {
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <NavLink to="/my-profile">
+                    <UserCircle className="h-4 w-4" />
+                    {!collapsed && <span>{t('nav.myProfile')}</span>}
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>{t('nav.setup')}</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {setupItems.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {!isGuardOnly && (
+          <>
+            <SidebarGroup>
+              <SidebarGroupLabel>{t('nav.setup')}</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {setupItems.map((item) => (
+                    <SidebarMenuItem key={item.url}>
+                      <SidebarMenuButton asChild>
+                        <NavLink to={item.url}>
+                          <item.icon className="h-4 w-4" />
+                          {!collapsed && <span>{item.title}</span>}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>{t('nav.operations')}</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {basicItems.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+            <SidebarGroup>
+              <SidebarGroupLabel>{t('nav.operations')}</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {basicItems.map((item) => (
+                    <SidebarMenuItem key={item.url}>
+                      <SidebarMenuButton asChild>
+                        <NavLink to={item.url}>
+                          <item.icon className="h-4 w-4" />
+                          {!collapsed && <span>{item.title}</span>}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>{t('nav.dataManagement')}</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {dataItems.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+            <SidebarGroup>
+              <SidebarGroupLabel>{t('nav.dataManagement')}</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {dataItems.map((item) => (
+                    <SidebarMenuItem key={item.url}>
+                      <SidebarMenuButton asChild>
+                        <NavLink to={item.url}>
+                          <item.icon className="h-4 w-4" />
+                          {!collapsed && <span>{item.title}</span>}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </>
+        )}
       </SidebarContent>
     </Sidebar>
   );

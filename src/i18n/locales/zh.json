@@ -76,6 +76,7 @@
   "nav": {
     "dashboard": "仪表板",
     "scanCheckIn": "扫码签到",
+    "myProfile": "个人资料",
     "setup": "初始设置",
     "companies": "公司设置",
     "projects": "顾客/项目",
@@ -91,6 +92,18 @@
     "attendanceReport": "考勤统计",
     "systemManagement": "系统管理",
     "userManagement": "用户与权限"
+  },
+  "myProfile": {
+    "title": "个人资料",
+    "description": "查看和编辑您的个人信息",
+    "accountInfo": "账户信息",
+    "accountInfoDesc": "以下信息由管理员设置，无法自行修改",
+    "personalInfo": "个人信息",
+    "personalInfoDesc": "您可以修改以下基本信息",
+    "company": "所属公司",
+    "birthDate": "出生日期",
+    "idNumber": "证件号码",
+    "nameRequired": "姓名不能为空"
   },
   "header": {
     "patrol": "巡更系统"
